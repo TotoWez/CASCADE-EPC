@@ -56,7 +56,12 @@ create policy orgmem_select on org_members for select using (
 create policy orgmem_write on org_members for all using (is_org_admin(org_id)) with check (is_org_admin(org_id));
 
 -- ---- projects --------------------------------------------------------------
-create policy projects_select on projects for select using (auth_project_role(id) is not null);
+-- SELECT must NOT query the projects table (auth_project_role self-references it),
+-- or INSERT ... RETURNING can't read back a just-created row. Use org-admin /
+-- membership checks instead.
+create policy projects_select on projects for select using (
+  is_platform_staff() or is_org_admin(org_id) or is_project_member(id)
+);
 create policy projects_insert on projects for insert with check (is_org_admin(org_id));
 create policy projects_update on projects for update
   using (auth_project_role(id) in ('admin', 'developer'))

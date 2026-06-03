@@ -41,6 +41,15 @@ returns boolean language sql stable security definer set search_path = public as
   );
 $$;
 
+-- Project visibility WITHOUT querying the projects table (so INSERT ... RETURNING
+-- can read back a just-created project). Used by projects_select.
+create or replace function is_project_member(p_project uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from memberships where project_id = p_project and user_id = (select auth.uid())
+  );
+$$;
+
 -- Effective role for a project: developer (platform) > admin (org) > membership role.
 create or replace function auth_project_role(p_project uuid)
 returns text language sql stable security definer set search_path = public as $$
