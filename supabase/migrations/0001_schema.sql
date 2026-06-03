@@ -34,7 +34,7 @@ create table profiles (
 create table organizations (
   id                uuid primary key default gen_random_uuid(),
   name              text not null,
-  slug              text unique,
+  slug              text,  -- friendly label only; NOT unique (names collide across customers)
   logo_url          text,
   brand             jsonb not null default '{}'::jsonb,
   subscription_tier text not null default 'free',

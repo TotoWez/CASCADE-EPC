@@ -11,13 +11,18 @@ returns boolean language sql stable security definer set search_path = public as
   select exists (select 1 from profiles where id = auth.uid() and platform_role is not null);
 $$;
 
+-- Platform-staff check is inlined (a nested SECURITY DEFINER call evaluated
+-- false inside an INSERT WITH CHECK); `(select auth.uid())` is the Supabase-
+-- recommended form for RLS predicates.
 create or replace function is_org_admin(p_org uuid)
 returns boolean language sql stable security definer set search_path = public as $$
-  select is_platform_staff()
-      or exists (
-        select 1 from org_members
-        where org_id = p_org and user_id = auth.uid() and org_role = 'admin'
-      );
+  select exists (
+    select 1 from org_members
+    where org_id = p_org and user_id = (select auth.uid()) and org_role = 'admin'
+  ) or exists (
+    select 1 from profiles
+    where id = (select auth.uid()) and platform_role is not null
+  );
 $$;
 
 -- Membership checks used by profiles/organizations/org_members SELECT policies.
