@@ -9,7 +9,7 @@ import { hasBackend, login, ensureOrg, uniqueCode } from "../helpers/backend";
  */
 test.describe("app · live backend", () => {
   test.skip(!hasBackend, "set E2E_TEST_EMAIL/E2E_TEST_PASSWORD + a Supabase-backed dev server");
-  test.skip(({ browserName }, info) => info.project.name === "mobile", "desktop-only");
+  test.skip((_, info) => info.project.name === "mobile", "desktop-only");
 
   test("signs in and loads the authenticated shell", async ({ page }) => {
     await login(page);

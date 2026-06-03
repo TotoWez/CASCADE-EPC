@@ -32,7 +32,7 @@ export async function ganttReport(project: Project, nodes: WbsNode[]) {
   const ps = parse(project.startDate), pe = parse(project.endDate);
   if (ps) times.push(ps); if (pe) times.push(pe);
   const now = Date.now();
-  let min = times.length ? Math.min(...times) : now;
+  const min = times.length ? Math.min(...times) : now;
   let max = times.length ? Math.max(...times) : now + 30 * 86400000;
   if (min === max) max = min + 30 * 86400000;
 
