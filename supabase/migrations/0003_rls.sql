@@ -32,22 +32,18 @@ alter table activity          enable row level security;
 alter table invitations       enable row level security;
 
 -- ---- profiles --------------------------------------------------------------
+-- NOTE: membership checks route through SECURITY DEFINER helpers (is_org_member /
+-- shares_org_with) to avoid RLS recursion (42P17) — never query org_members
+-- inline from policies on profiles / organizations / org_members.
 create policy profiles_select on profiles for select using (
-  id = auth.uid()
-  or is_platform_staff()
-  or exists (
-    select 1 from org_members a
-    join org_members b on a.org_id = b.org_id
-    where a.user_id = auth.uid() and b.user_id = profiles.id
-  )
+  id = auth.uid() or is_platform_staff() or shares_org_with(profiles.id)
 );
 create policy profiles_insert on profiles for insert with check (id = auth.uid());
 create policy profiles_update on profiles for update using (id = auth.uid()) with check (id = auth.uid());
 
 -- ---- organizations ---------------------------------------------------------
 create policy orgs_select on organizations for select using (
-  is_platform_staff()
-  or exists (select 1 from org_members where org_id = organizations.id and user_id = auth.uid())
+  is_platform_staff() or is_org_member(organizations.id)
 );
 create policy orgs_insert on organizations for insert with check (created_by = auth.uid());
 create policy orgs_update on organizations for update using (is_org_admin(id)) with check (is_org_admin(id));
@@ -55,8 +51,7 @@ create policy orgs_delete on organizations for delete using (is_platform_staff()
 
 -- ---- org_members -----------------------------------------------------------
 create policy orgmem_select on org_members for select using (
-  is_platform_staff()
-  or exists (select 1 from org_members me where me.org_id = org_members.org_id and me.user_id = auth.uid())
+  is_platform_staff() or is_org_member(org_members.org_id)
 );
 create policy orgmem_write on org_members for all using (is_org_admin(org_id)) with check (is_org_admin(org_id));
 

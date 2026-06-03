@@ -12,6 +12,7 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
 | `0004_rpcs.sql` | Triggers + RPCs (gates, invites, bulk, snapshots, signup) |
 | `0005_storage_cron.sql` | Storage buckets + policies, daily auto-snapshot, keep-alive |
 | `0006_realtime.sql` | Add live-collaboration tables to the `supabase_realtime` publication |
+| `0007_fix_rls_recursion.sql` | Fix RLS recursion (42P17) on profiles/organizations/org_members via SECURITY DEFINER helpers |
 | `seed.sql` | Optional demo org/project/WBS (attaches to first profile) |
 
 ## Apply to a hosted project (free tier)

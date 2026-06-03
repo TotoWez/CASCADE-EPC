@@ -20,6 +20,22 @@ returns boolean language sql stable security definer set search_path = public as
       );
 $$;
 
+-- Membership checks used by profiles/organizations/org_members SELECT policies.
+-- SECURITY DEFINER so they bypass RLS and never recurse into org_members' policy.
+create or replace function is_org_member(p_org uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from org_members where org_id = p_org and user_id = auth.uid());
+$$;
+
+create or replace function shares_org_with(p_user uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from org_members a
+    join org_members b on a.org_id = b.org_id
+    where a.user_id = auth.uid() and b.user_id = p_user
+  );
+$$;
+
 -- Effective role for a project: developer (platform) > admin (org) > membership role.
 create or replace function auth_project_role(p_project uuid)
 returns text language sql stable security definer set search_path = public as $$
