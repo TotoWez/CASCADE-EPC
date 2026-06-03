@@ -102,7 +102,23 @@ export async function getProject(id: string): Promise<Project | null> {
 export async function createProject(input: ProjectInput): Promise<Project> {
   const { data, error } = await supabase.from("projects").insert(inputToRow(input)).select("*").single();
   if (error) throw error;
-  return rowToProject(data as ProjectRow);
+  const project = rowToProject(data as ProjectRow);
+
+  // Every project has exactly one root node — create it up front so the WBS is
+  // ready to build immediately (the manual "Root" button is only a fallback).
+  const { error: rootErr } = await supabase.from("nodes").insert({
+    project_id: project.id,
+    node_code: "NODE-1000",
+    parent_id: null,
+    title: project.name,
+    category: "root",
+    priority: 3,
+    volume: 1,
+    order_index: 0,
+  });
+  if (rootErr) throw rootErr;
+
+  return project;
 }
 
 export async function updateProject(id: string, patch: Partial<ProjectInput>): Promise<Project> {

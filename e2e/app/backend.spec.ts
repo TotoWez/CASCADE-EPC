@@ -38,10 +38,9 @@ test.describe.serial("app · live backend", () => {
     await expect(page.getByRole("button", { name: /expand all/i })).toBeVisible();
     await expect(page.getByText(/\d+ nodes/)).toBeVisible();
 
-    // Build the first node (admin/manager can build). "New Root" shows on both
-    // the node card and the auto-selected inspector, so assert at least one.
-    await page.getByRole("button", { name: "Root", exact: true }).click();
-    await expect(page.getByText("New Root").first()).toBeVisible();
+    // The project's single root node is auto-created on project creation and is
+    // titled after the project, so it should already be on the canvas.
+    await expect(page.getByText("E2E Smoke Project").first()).toBeVisible();
 
     // NOTE: deeper per-role / rollup / gate assertions can be layered here once
     // pointed at a known seed — the underlying logic is covered by Vitest unit tests.

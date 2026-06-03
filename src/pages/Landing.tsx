@@ -60,6 +60,12 @@ export function Landing() {
           <Brand size={30} />
           <nav className="flex flex-wrap items-center gap-2">
             <Link
+              to="/pricing"
+              className="hidden px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink sm:inline-block"
+            >
+              Pricing
+            </Link>
+            <Link
               to="/about"
               className="hidden px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink sm:inline-block"
             >
