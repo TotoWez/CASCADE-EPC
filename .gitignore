@@ -13,6 +13,10 @@ dist-ssr
 .env.local
 .env.*.local
 
+# demo credentials — working logins to the live backend; keep local only
+DEMO_CREDENTIALS.md
+demo-credentials.csv
+
 # editor / OS
 .DS_Store
 Thumbs.db

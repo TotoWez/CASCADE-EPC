@@ -15,6 +15,7 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
 | `0007_fix_rls_recursion.sql` | Fix RLS recursion (42P17) on profiles/organizations/org_members via SECURITY DEFINER helpers |
 | `0008_fix_project_insert_and_slug.sql` | Fix project-creation WITH CHECK (re-create is_org_admin) + drop global-unique org slug |
 | `0009_fix_projects_select.sql` | Fix project INSERT…RETURNING read-back (projects_select no longer self-queries projects) |
+| `0010_lock_platform_role.sql` | **Security:** trigger blocking users from self-setting `platform_role` (privilege escalation) |
 | `seed.sql` | Optional demo org/project/WBS (attaches to first profile) |
 
 ## Apply to a hosted project (free tier)
