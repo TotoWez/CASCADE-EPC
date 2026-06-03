@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420" viewBox="0 0 420 420" role="img">
+  <title>CASCADE EPC mark</title>
+
+  <defs>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#65A3FF"/>
+      <stop offset="0.52" stop-color="#0057FF"/>
+      <stop offset="1" stop-color="#003DBF"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFC46B"/>
+      <stop offset="0.55" stop-color="#E07C00"/>
+      <stop offset="1" stop-color="#A94F00"/>
+    </linearGradient>
+    <linearGradient id="silverGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.42" stop-color="#E8EDF5"/>
+      <stop offset="0.75" stop-color="#BAC5D3"/>
+      <stop offset="1" stop-color="#79889A"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.18" stop-color="#A7B4C5"/>
+      <stop offset="0.34" stop-color="#F6FAFF"/>
+      <stop offset="0.55" stop-color="#77869A"/>
+      <stop offset="0.76" stop-color="#EEF5FC"/>
+      <stop offset="1" stop-color="#566476"/>
+    </linearGradient>
+    <filter id="softShadow" x="-35%" y="-35%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000814" flood-opacity="0.30"/>
+    </filter>
+    <filter id="neonGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.0  0 0 0 0 0.34  0 0 0 0 1.0  0 0 0 .95 0" result="blueglow"/>
+      <feMerge><feMergeNode in="blueglow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="appBg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#31465F"/>
+      <stop offset="0.52" stop-color="#1B2636"/>
+      <stop offset="1" stop-color="#0F1723"/>
+    </radialGradient>
+    <style><![CDATA[
+      .word{font-family:'Orbitron ExtraBold','Orbitron','Arial Black','Segoe UI',Arial,sans-serif;font-weight:800;letter-spacing:18px;}
+      .epc{font-family:'Orbitron ExtraBold','Orbitron','Arial Black','Segoe UI',Arial,sans-serif;font-weight:800;letter-spacing:14px;}
+      .tag{font-family:'Orbitron ExtraBold','Orbitron','Arial Black','Segoe UI',Arial,sans-serif;font-weight:800;font-size:30px;letter-spacing:5.5px;}
+      .dot-blue{fill:#0057FF;}
+      .dot-orange{fill:#E07C00;}
+      .dot-green{fill:#00B37A;}
+    ]]></style>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path d="M313 78H180C104 78 43 139 43 215s61 137 137 137h133l30-62H181c-41 0-74-33-74-75s33-75 74-75h102z" fill="url(#silverGrad)"/>
+    <path d="M329 152H194c-36 0-65 29-65 64s29 64 65 64h135l29-59H195c-4 0-8-2-8-6s4-7 8-7h104z" fill="url(#blueGrad)"/>
+    <path d="M354 224H198c-5 0-10-4-10-9c0-4 4-8 9-8h83l-33 66h107l31-49z" fill="url(#orangeGrad)"/>
+    <path d="M180 78C104 78 43 139 43 215c0 35 13 67 35 91C65 284 58 259 58 233c0-76 61-137 137-137h110l8-18z" fill="#FFFFFF" opacity="0.20"/>
+  </g>
+</svg>

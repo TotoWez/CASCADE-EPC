@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Force | Select-Object Mode, Length, Name; Write-Output \"---ITEMCOUNT---\"; \\(Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue | Measure-Object\\).Count)",
+      "PowerShell(Get-ChildItem -Recurse -File \"Base Files\" | Select-Object @{N='RelPath';E={$_.FullName.Replace\\(\\(Get-Location\\).Path + '\\\\',''\\)}}, @{N='KB';E={[math]::Round\\($_.Length/1KB,1\\)}} | Format-Table -AutoSize)"
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Brand font — Orbitron ExtraBold (self-hosted).
+   Used for the wordmark, page headers, and KPI labels.
+   ============================================================ */
+@font-face {
+  font-family: "Orbitron";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/brand/Orbitron-ExtraBold.ttf") format("truetype");
+}
+
+/* ============================================================
+   Theme tokens. Channels are space-separated RGB so Tailwind's
+   `rgb(var(--x) / <alpha-value>)` works. Default = dark (SCADA).
+   ============================================================ */
+:root,
+.dark {
+  --canvas: 15 23 35; /* #0F1723 */
+  --surface: 27 38 54; /* #1B2636 */
+  --surface-2: 40 53 67; /* #283543 */
+  --line: 58 71 87; /* #3A4757 */
+  --ink: 232 237 245; /* #E8EDF5 */
+  --ink-dim: 154 168 186; /* #9AA8BA */
+  --ink-mute: 121 136 154; /* #79889A */
+  --accent: 0 87 255; /* brand blue */
+
+  --grid-bg: linear-gradient(rgba(101, 163, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101, 163, 255, 0.05) 1px, transparent 1px);
+  color-scheme: dark;
+}
+
+.light {
+  --canvas: 240 243 248; /* near-white steel */
+  --surface: 255 255 255;
+  --surface-2: 232 237 245;
+  --line: 186 197 211;
+  --ink: 27 38 54;
+  --ink-dim: 86 100 118;
+  --ink-mute: 121 136 154;
+  --accent: 0 87 255;
+
+  --grid-bg: linear-gradient(rgba(40, 53, 67, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(40, 53, 67, 0.06) 1px, transparent 1px);
+  color-scheme: light;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: "cv05", "ss01";
+  }
+
+  /* Engineering grid backdrop for working surfaces. */
+  .bg-engineering {
+    background-image: var(--grid-bg);
+    background-size: 24px 24px;
+  }
+
+  /* Focus ring consistent with the instrument-panel aesthetic. */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-blue/70 ring-offset-1 ring-offset-canvas;
+  }
+}
+
+@layer components {
+  /* KPI block: label above, value below, thin divider — not a fluffy badge. */
+  .kpi {
+    @apply flex flex-col justify-center px-3 py-1.5 border-l border-line first:border-l-0;
+  }
+  .kpi-label {
+    @apply font-brand text-2xs uppercase tracking-widest text-ink-mute;
+  }
+  .kpi-value {
+    @apply font-mono text-base leading-tight text-ink;
+  }
+
+  /* Mono count badge used across filters and pills. */
+  .count-badge {
+    @apply font-mono text-2xs px-1.5 py-0.5 rounded bg-surface-2 text-ink-dim;
+  }
+}
+
+/* ============================================================
+   Floating / inset scrollbars — thin, instrument-panel feel.
+   ============================================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line)) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--line));
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--ink-mute));
+  background-clip: content-box;
+}

@@ -1,0 +1,9 @@
+{
+  "//": "Unused: vite.config.ts and tailwind.config.ts are type-checked by the root tsconfig.json. Kept as a placeholder.",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "files": [],
+  "include": []
+}
