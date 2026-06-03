@@ -7,10 +7,9 @@ import { hasBackend, login, ensureOrg, uniqueCode } from "../helpers/backend";
  *
  * These run on the `desktop` project only (the inspector is a drawer on mobile).
  */
-test.describe("app · live backend", () => {
+// Serial: these tests share one test user, so they must not race each other.
+test.describe.serial("app · live backend", () => {
   test.skip(!hasBackend, "set E2E_TEST_EMAIL/E2E_TEST_PASSWORD + a Supabase-backed dev server");
-  // Playwright requires a destructuring pattern for the first arg; alias unused.
-  test.skip(({ browserName: _b }, info) => info.project.name === "mobile", "desktop-only");
 
   test("signs in and loads the authenticated shell", async ({ page }) => {
     await login(page);
@@ -39,9 +38,10 @@ test.describe("app · live backend", () => {
     await expect(page.getByRole("button", { name: /expand all/i })).toBeVisible();
     await expect(page.getByText(/\d+ nodes/)).toBeVisible();
 
-    // Build the first node (admin/manager can build).
+    // Build the first node (admin/manager can build). "New Root" shows on both
+    // the node card and the auto-selected inspector, so assert at least one.
     await page.getByRole("button", { name: "Root", exact: true }).click();
-    await expect(page.getByText("New Root")).toBeVisible();
+    await expect(page.getByText("New Root").first()).toBeVisible();
 
     // NOTE: deeper per-role / rollup / gate assertions can be layered here once
     // pointed at a known seed — the underlying logic is covered by Vitest unit tests.

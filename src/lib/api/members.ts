@@ -42,9 +42,10 @@ function pickProfile(p: any): { name: string; email: string; position: string; a
 }
 
 export async function listMembers(projectId: string): Promise<ProjectMember[]> {
+  // Disambiguate: memberships has two FKs to profiles (user_id, invited_by).
   const { data, error } = await supabase
     .from("memberships")
-    .select("user_id, role, can_comment, profiles(full_name, email, position, avatar_url)")
+    .select("user_id, role, can_comment, profiles!memberships_user_id_fkey(full_name, email, position, avatar_url)")
     .eq("project_id", projectId);
   if (error) throw error;
   return (data as any[]).map((m) => ({

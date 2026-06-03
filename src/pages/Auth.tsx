@@ -1,21 +1,30 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MailCheck } from "lucide-react";
 import { AuthCard } from "@/components/AuthCard";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { signIn, signUp } from "@/lib/api/auth";
+import { useAuth } from "@/store/auth";
 import { toast, errMessage } from "@/store/toast";
 import { env } from "@/lib/env";
 
 export function Auth({ mode }: { mode: "signin" | "signup" }) {
   const isSignup = mode === "signup";
   const navigate = useNavigate();
+  const status = useAuth((s) => s.status);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+
+  // Navigate to the app only once the auth store has actually loaded the
+  // session — avoids a race where navigating immediately after signIn() bounces
+  // off RequireAuth (still "anon") back to /signin.
+  useEffect(() => {
+    if (status === "authed") navigate("/app", { replace: true });
+  }, [status, navigate]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -26,11 +35,13 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
     setBusy(true);
     try {
       if (isSignup) {
-        await signUp(email, password, fullName);
-        setSent(true);
+        const data = await signUp(email, password, fullName);
+        // Email confirmation off → a session is returned and the effect above
+        // routes to /app. Confirmation on → show the "check your email" screen.
+        if (!data.session) setSent(true);
       } else {
         await signIn(email, password);
-        navigate("/app");
+        // The effect routes to /app when the store becomes authed.
       }
     } catch (err) {
       toast.error(errMessage(err));
