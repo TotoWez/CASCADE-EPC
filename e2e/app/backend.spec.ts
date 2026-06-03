@@ -9,7 +9,8 @@ import { hasBackend, login, ensureOrg, uniqueCode } from "../helpers/backend";
  */
 test.describe("app · live backend", () => {
   test.skip(!hasBackend, "set E2E_TEST_EMAIL/E2E_TEST_PASSWORD + a Supabase-backed dev server");
-  test.skip((_, info) => info.project.name === "mobile", "desktop-only");
+  // Playwright requires a destructuring pattern for the first arg; alias unused.
+  test.skip(({ browserName: _b }, info) => info.project.name === "mobile", "desktop-only");
 
   test("signs in and loads the authenticated shell", async ({ page }) => {
     await login(page);
