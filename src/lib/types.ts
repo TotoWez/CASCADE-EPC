@@ -93,6 +93,14 @@ export const DISPLAY_STATUS_COLOR: Record<DisplayStatus, string> = {
   blocked: "status-blocked",
 };
 
+/** Literal Tailwind background classes per status — shared by status dots. */
+export const STATUS_DOT_CLASS: Record<DisplayStatus, string> = {
+  not_started: "bg-status-notstarted",
+  on_progress: "bg-status-progress",
+  done: "bg-status-done",
+  blocked: "bg-status-blocked",
+};
+
 export const QA_GATE_LABEL: Record<QaGate, string> = {
   na: "N/A",
   open: "Open",

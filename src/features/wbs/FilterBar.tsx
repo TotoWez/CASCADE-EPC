@@ -4,12 +4,9 @@ import { Search, X, Flag } from "lucide-react";
 import { useTree } from "@/store/tree";
 import { getChildren } from "@/lib/domain/tree";
 import { computeCounts, filtersActive } from "@/lib/domain/filter";
-import { DISPLAY_STATUS_LABEL, type DisplayStatus, type Priority } from "@/lib/types";
+import { DISPLAY_STATUS_LABEL, STATUS_DOT_CLASS, type DisplayStatus, type Priority } from "@/lib/types";
 import { Input } from "@/components/ui/Input";
 
-const STATUS_DOT: Record<DisplayStatus, string> = {
-  not_started: "bg-status-notstarted", on_progress: "bg-status-progress", done: "bg-status-done", blocked: "bg-status-blocked",
-};
 // Priority flag colors, mirrored from the node cards (P1 red / P2 orange / P3 gray).
 const PRIORITY_HEX: Record<number, string> = { 1: "#E5484D", 2: "#E07C00", 3: "#79889A" };
 
@@ -54,7 +51,7 @@ export function FilterBar({ onAddCategory }: { onAddCategory?: () => void }) {
 
       {(["not_started", "on_progress", "done", "blocked"] as DisplayStatus[]).map((s) => (
         <Chip key={s} active={filters.statuses.has(s)} dim={counts.statuses[s] === 0} onClick={() => toggleStatus(s)}>
-          <span className={clsx("h-2 w-2 rounded-full", STATUS_DOT[s])} />
+          <span className={clsx("h-2 w-2 rounded-full", STATUS_DOT_CLASS[s])} />
           {DISPLAY_STATUS_LABEL[s]} <span className="text-ink-mute">{counts.statuses[s]}</span>
         </Chip>
       ))}

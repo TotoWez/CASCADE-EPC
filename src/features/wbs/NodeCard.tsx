@@ -5,16 +5,9 @@ import {
   GitBranch, Link2, MessageSquare, ShieldCheck, ShieldAlert, BadgeCheck, Clock,
 } from "lucide-react";
 import type { DisplayStatus, WbsNode } from "@/lib/types";
-import { PRIORITY_LABEL } from "@/lib/types";
+import { PRIORITY_LABEL, STATUS_DOT_CLASS } from "@/lib/types";
 import type { DueState } from "@/lib/domain/status";
 import { progressColor } from "@/lib/domain/status";
-
-const STATUS_DOT: Record<DisplayStatus, string> = {
-  not_started: "bg-status-notstarted",
-  on_progress: "bg-status-progress",
-  done: "bg-status-done",
-  blocked: "bg-status-blocked",
-};
 // Solid, high-contrast priority flags so the colour reads at a glance.
 const PRIORITY_CLS: Record<number, string> = {
   1: "bg-priority-p1 text-white border-priority-p1",
@@ -94,7 +87,7 @@ export function NodeCard(props: NodeCardProps) {
           <span className="w-[15px]" />
         )}
 
-        <span className={clsx("h-2.5 w-2.5 shrink-0 rounded-full", STATUS_DOT[status])} title={status} />
+        <span className={clsx("h-2.5 w-2.5 shrink-0 rounded-full", STATUS_DOT_CLASS[status])} title={status} />
         <span className="font-mono text-2xs text-ink-dim">{node.nodeCode}</span>
 
         <span className={clsx("rounded border px-1 font-mono text-2xs font-semibold", PRIORITY_CLS[node.priority])} title={`Priority ${node.priority}`}>

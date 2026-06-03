@@ -4,21 +4,10 @@ import { buildChildrenIndex, toNodeMap, getChildren } from "@/lib/domain/tree";
 import { computeEffectiveProgress } from "@/lib/domain/rollup";
 import { displayStatus } from "@/lib/domain/status";
 import { siblingAccent } from "@/lib/domain/color";
-import { drawFooter, getMarkPng, reportFilename, sanitize, STATUS_RGB, RGB } from "./common";
+import { drawFooter, getMarkPng, hslToRgb, reportFilename, sanitize, STATUS_RGB, RGB } from "./common";
 
 const NODE_W = 46, NODE_H = 17, H_GAP = 8, V_GAP = 20, MARGIN = 12, HEADER = 22;
 const MAX_DIM = 2200; // cap page size; scale down beyond this
-
-function hslToRgb(hsl: string): [number, number, number] {
-  const m = /hsl\((\d+)/.exec(hsl);
-  const hh = m ? Number(m[1]) : 210;
-  const c = 0.45, x = c * (1 - Math.abs(((hh / 60) % 2) - 1)), l = 0.55 - c / 2;
-  let r = 0, g = 0, b = 0;
-  if (hh < 60) [r, g, b] = [c, x, 0]; else if (hh < 120) [r, g, b] = [x, c, 0];
-  else if (hh < 180) [r, g, b] = [0, c, x]; else if (hh < 240) [r, g, b] = [0, x, c];
-  else if (hh < 300) [r, g, b] = [x, 0, c]; else [r, g, b] = [c, 0, x];
-  return [Math.round((r + l) * 255), Math.round((g + l) * 255), Math.round((b + l) * 255)];
-}
 
 export async function flowchartReport(project: Project, nodes: WbsNode[]) {
   const map = toNodeMap(nodes);

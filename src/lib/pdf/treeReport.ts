@@ -6,28 +6,11 @@ import { displayStatus } from "@/lib/domain/status";
 import { siblingAccent } from "@/lib/domain/color";
 import {
   drawHeader, drawFooter, drawSummary, drawLegend, getMarkPng, reportFilename, sanitize,
-  STATUS_RGB, RGB, type ReportStats,
+  hslToRgb, STATUS_RGB, RGB, type ReportStats,
 } from "./common";
 import { overallProgress } from "@/lib/domain/rollup";
 
 type Kind = "Full" | "Selected" | "Progress";
-
-function hslToRgb(hsl: string): [number, number, number] {
-  const m = /hsl\((\d+)/.exec(hsl);
-  const h = m ? Number(m[1]) : 210;
-  const s = 0.5, l = 0.55;
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const mm = l - c / 2;
-  let r = 0, g = 0, b = 0;
-  if (h < 60) [r, g, b] = [c, x, 0];
-  else if (h < 120) [r, g, b] = [x, c, 0];
-  else if (h < 180) [r, g, b] = [0, c, x];
-  else if (h < 240) [r, g, b] = [0, x, c];
-  else if (h < 300) [r, g, b] = [x, 0, c];
-  else [r, g, b] = [c, 0, x];
-  return [Math.round((r + mm) * 255), Math.round((g + mm) * 255), Math.round((b + mm) * 255)];
-}
 
 async function buildTreeReport(project: Project, nodes: WbsNode[], kind: Kind, includeSet: Set<string> | null) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
