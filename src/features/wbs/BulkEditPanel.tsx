@@ -90,6 +90,37 @@ export function BulkEditPanel() {
     }
   }
 
+  // Merge every field that has a value into one patch and apply to all selected
+  // nodes in a single operation (one activity entry, via bulkApply).
+  function buildAllPatch(): { patch: BulkPatch; count: number } {
+    let patch: BulkPatch = {};
+    let count = 0;
+    const fields: FieldKey[] = ["workStatus", "progress", "priority", "category", "assigneeName", "startDate", "dueDate"];
+    for (const f of fields) {
+      const val = v(f);
+      if (val === "") continue;
+      patch = { ...patch, ...bulkCouple(f, val) };
+      count++;
+    }
+    return { patch, count };
+  }
+
+  async function applyAll() {
+    const { patch, count } = buildAllPatch();
+    if (count === 0) return toast.error("Enter at least one value first.");
+    if (!confirm(`Apply ${count} field(s) to all ${ids.length} selected node(s)?`)) return;
+    setBusy(true);
+    try {
+      const n = await t.bulkApply(ids, patch);
+      toast.success(`Updated ${n} node(s).`);
+      setVals({});
+    } catch (e) {
+      toast.error(errMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const Row = ({ field, label, children }: { field: FieldKey; label: string; children: ReactNode }) => (
     <div className="mb-3">
       <label className="mb-1 block font-mono text-2xs uppercase tracking-widest text-ink-mute">{label}</label>
@@ -145,6 +176,13 @@ export function BulkEditPanel() {
           <Row field="dueDate" label="Due date">
             <Input className="flex-1" type="date" value={v("dueDate")} onChange={(e) => setV("dueDate", e.target.value)} />
           </Row>
+
+          <div className="mt-2 border-t border-line pt-3">
+            <Button className="w-full" loading={busy} onClick={applyAll}>
+              Apply all fields to {ids.length} node(s)
+            </Button>
+            <p className="mt-1.5 text-center text-2xs text-ink-mute">Applies every field you filled in, in one step.</p>
+          </div>
         </div>
       )}
 

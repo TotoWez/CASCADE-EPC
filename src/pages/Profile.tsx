@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { UserRound, Camera } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { UserRound, Camera, ArrowLeft } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
@@ -8,6 +9,7 @@ import { updateProfile, uploadAvatar } from "@/lib/api/profile";
 import { toast, errMessage } from "@/store/toast";
 
 export function Profile() {
+  const navigate = useNavigate();
   const profile = useAuth((s) => s.profile);
   const user = useAuth((s) => s.user);
   const refresh = useAuth((s) => s.refresh);
@@ -59,6 +61,20 @@ export function Profile() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-xl px-4 py-10">
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 rounded border border-line bg-surface px-2.5 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink hover:border-ink-mute"
+          >
+            <ArrowLeft size={14} /> Back
+          </button>
+          <button
+            onClick={() => navigate("/app")}
+            className="font-mono text-2xs uppercase tracking-widest text-ink-mute hover:text-ink"
+          >
+            Close
+          </button>
+        </div>
         <h1 className="font-brand text-2xl tracking-wide text-ink">Your profile</h1>
         <p className="mt-2 text-sm text-ink-dim">Personal details shown across the platform.</p>
 

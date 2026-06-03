@@ -15,10 +15,11 @@ const STATUS_DOT: Record<DisplayStatus, string> = {
   done: "bg-status-done",
   blocked: "bg-status-blocked",
 };
+// Solid, high-contrast priority flags so the colour reads at a glance.
 const PRIORITY_CLS: Record<number, string> = {
-  1: "text-priority-p1 border-priority-p1/40",
-  2: "text-priority-p2 border-priority-p2/40",
-  3: "text-priority-p3 border-priority-p3/40",
+  1: "bg-priority-p1 text-white border-priority-p1",
+  2: "bg-priority-p2 text-white border-priority-p2",
+  3: "bg-priority-p3 text-white border-priority-p3",
 };
 const DUE_CLS: Record<DueState, string> = {
   none: "", ok: "text-ink-mute", soon: "text-brand-orange", overdue: "text-status-blocked",
@@ -76,7 +77,7 @@ export function NodeCard(props: NodeCardProps) {
       data-node-id={node.id}
       onClick={props.onSelect}
       className={clsx(
-        "group relative flex flex-col overflow-hidden rounded border bg-surface transition-shadow [contain-intrinsic-size:auto_72px] [content-visibility:auto]",
+        "group relative flex w-full max-w-[640px] flex-col overflow-hidden rounded border bg-surface transition-shadow [contain-intrinsic-size:auto_72px] [content-visibility:auto]",
         props.selected || props.multiSelected ? "border-brand-blue ring-1 ring-brand-blue/60" : "border-line hover:border-ink-mute",
         props.dimmed && "opacity-40",
       )}
@@ -96,7 +97,7 @@ export function NodeCard(props: NodeCardProps) {
         <span className={clsx("h-2.5 w-2.5 shrink-0 rounded-full", STATUS_DOT[status])} title={status} />
         <span className="font-mono text-2xs text-ink-dim">{node.nodeCode}</span>
 
-        <span className={clsx("rounded border px-1 font-mono text-2xs", PRIORITY_CLS[node.priority])} title={`Priority ${node.priority}`}>
+        <span className={clsx("rounded border px-1 font-mono text-2xs font-semibold", PRIORITY_CLS[node.priority])} title={`Priority ${node.priority}`}>
           <Flag size={9} className="-mt-0.5 mr-0.5 inline" />{PRIORITY_LABEL[node.priority]}
         </span>
         {node.category !== "root" && (
@@ -108,7 +109,7 @@ export function NodeCard(props: NodeCardProps) {
           {props.downstreamCount > 0 && <span className="flex items-center gap-0.5 text-2xs text-ink-mute" title={`${props.downstreamCount} downstream`}><GitBranch size={11} />{props.downstreamCount}</span>}
           {props.clusterSize > 1 && <span className="flex items-center gap-0.5 text-2xs text-brand-blue-light" title="Linked cluster"><Link2 size={11} />{props.clusterSize}</span>}
 
-          {gateQa && <span className={clsx("rounded px-1 text-2xs", node.qaGate === "closed" ? "bg-brand-green/15 text-brand-green" : "bg-brand-orange/15 text-brand-orange")} title={`QA: ${node.qaGate}`}><BadgeCheck size={10} className="-mt-0.5 mr-0.5 inline" />QA</span>}
+          {gateQa && <span className={clsx("rounded px-1 text-2xs", node.qaGate === "closed" ? "bg-brand-green/15 text-brand-green" : "bg-brand-orange/15 text-brand-orange")} title={`QAQC: ${node.qaGate}`}><BadgeCheck size={10} className="-mt-0.5 mr-0.5 inline" />QAQC</span>}
           {gateHse && <span className={clsx("rounded px-1 text-2xs", node.hseGate === "complied" ? "bg-brand-green/15 text-brand-green" : "bg-status-blocked/15 text-status-blocked")} title={`HSE: ${node.hseGate}`}>{node.hseGate === "complied" ? <ShieldCheck size={10} className="-mt-0.5 mr-0.5 inline" /> : <ShieldAlert size={10} className="-mt-0.5 mr-0.5 inline" />}HSE</span>}
 
           {props.noteCount > 0 && (

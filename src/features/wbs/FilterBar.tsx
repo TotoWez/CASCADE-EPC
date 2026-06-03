@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import clsx from "clsx";
-import { Search, Tags, X, Flag } from "lucide-react";
+import { Search, X, Flag } from "lucide-react";
 import { useTree } from "@/store/tree";
 import { getChildren } from "@/lib/domain/tree";
 import { computeCounts, filtersActive } from "@/lib/domain/filter";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/Input";
 const STATUS_DOT: Record<DisplayStatus, string> = {
   not_started: "bg-status-notstarted", on_progress: "bg-status-progress", done: "bg-status-done", blocked: "bg-status-blocked",
 };
+// Priority flag colors, mirrored from the node cards (P1 red / P2 orange / P3 gray).
+const PRIORITY_HEX: Record<number, string> = { 1: "#E5484D", 2: "#E07C00", 3: "#79889A" };
 
 function Chip({ active, dim, onClick, children }: { active: boolean; dim?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -23,7 +25,7 @@ function Chip({ active, dim, onClick, children }: { active: boolean; dim?: boole
   );
 }
 
-export function FilterBar({ onManageCategories }: { onManageCategories: () => void }) {
+export function FilterBar({ onAddCategory }: { onAddCategory?: () => void }) {
   const { nodes, effMap, index, filters, setFilter, resetFilters } = useTree();
 
   const leafIds = useMemo(() => new Set(nodes.filter((n) => getChildren(index, n.id).length === 0).map((n) => n.id)), [nodes, index]);
@@ -59,15 +61,15 @@ export function FilterBar({ onManageCategories }: { onManageCategories: () => vo
 
       <span className="mx-1 h-5 w-px bg-line" />
 
-      <Chip active={filters.qaOpen} dim={counts.qaOpen === 0} onClick={() => setFilter({ qaOpen: !filters.qaOpen })}>QA Open <span className="text-ink-mute">{counts.qaOpen}</span></Chip>
-      <Chip active={filters.qaClosed} dim={counts.qaClosed === 0} onClick={() => setFilter({ qaClosed: !filters.qaClosed })}>QA Closed <span className="text-ink-mute">{counts.qaClosed}</span></Chip>
+      <Chip active={filters.qaOpen} dim={counts.qaOpen === 0} onClick={() => setFilter({ qaOpen: !filters.qaOpen })}>QAQC Open <span className="text-ink-mute">{counts.qaOpen}</span></Chip>
       <Chip active={filters.hseNot} dim={counts.hseNot === 0} onClick={() => setFilter({ hseNot: !filters.hseNot })}>HSE !Complied <span className="text-ink-mute">{counts.hseNot}</span></Chip>
 
       <span className="mx-1 h-5 w-px bg-line" />
 
       {([1, 2, 3] as Priority[]).map((p) => (
         <Chip key={p} active={filters.priorities.has(p)} dim={counts.priorities[p] === 0} onClick={() => togglePriority(p)}>
-          <Flag size={9} />P{p} <span className="text-ink-mute">{counts.priorities[p]}</span>
+          <span className="inline-flex items-center gap-1 font-semibold" style={{ color: PRIORITY_HEX[p] }}><Flag size={9} />P{p}</span>
+          <span className="text-ink-mute">{counts.priorities[p]}</span>
         </Chip>
       ))}
 
@@ -79,13 +81,16 @@ export function FilterBar({ onManageCategories }: { onManageCategories: () => vo
 
       <select
         value={filters.category ?? ""}
-        onChange={(e) => setFilter({ category: e.target.value || null })}
+        onChange={(e) => {
+          if (e.target.value === "__add__") { onAddCategory?.(); return; }
+          setFilter({ category: e.target.value || null });
+        }}
         className="h-8 rounded border border-line bg-surface px-2 font-mono text-2xs text-ink-dim"
       >
         <option value="">All categories</option>
         {categoryNames.map((c) => <option key={c} value={c}>{c} ({counts.categories[c]})</option>)}
+        {onAddCategory && <option value="__add__">＋ Add category…</option>}
       </select>
-      <button onClick={onManageCategories} className="text-ink-mute hover:text-ink" title="Manage categories"><Tags size={15} /></button>
 
       {active && (
         <button onClick={resetFilters} className="ml-auto inline-flex items-center gap-1 font-mono text-2xs uppercase tracking-widest text-ink-mute hover:text-ink">

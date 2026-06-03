@@ -34,7 +34,7 @@ const FEATURES = [
   },
   {
     icon: ShieldCheck,
-    title: "QA & HSE gates",
+    title: "QAQC & HSE gates",
     body: "Quality and safety own their own gates. Complied / Not-Complied and Closed / Pending sit alongside the work hierarchy.",
   },
   {

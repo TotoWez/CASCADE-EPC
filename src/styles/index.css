@@ -61,10 +61,40 @@
     font-feature-settings: "cv05", "ss01";
   }
 
-  /* Engineering grid backdrop for working surfaces. */
+  /* Engineering grid backdrop for working surfaces, plus a visible ambient drift.
+     The grid layers stay fixed; only the two brand-tinted blooms move, so
+     repaints stay cheap (the browser only repaints the visible region). */
   .bg-engineering {
-    background-image: var(--grid-bg);
-    background-size: 24px 24px;
+    background-image:
+      radial-gradient(50rem 34rem at 10% -5%, rgba(0, 87, 255, 0.22), transparent 60%),
+      radial-gradient(46rem 30rem at 115% 110%, rgba(224, 124, 0, 0.18), transparent 60%),
+      var(--grid-bg);
+    background-size: 200% 200%, 200% 200%, 24px 24px, 24px 24px;
+    background-position: 0% 0%, 100% 100%, 0 0, 0 0;
+    background-repeat: no-repeat, no-repeat, repeat, repeat;
+    animation: cascade-drift 20s ease-in-out infinite alternate;
+  }
+
+  .light .bg-engineering {
+    background-image:
+      radial-gradient(50rem 34rem at 10% -5%, rgba(0, 87, 255, 0.14), transparent 60%),
+      radial-gradient(46rem 30rem at 115% 110%, rgba(224, 124, 0, 0.12), transparent 60%),
+      var(--grid-bg);
+  }
+
+  @keyframes cascade-drift {
+    from {
+      background-position: 0% 0%, 100% 100%, 0 0, 0 0;
+    }
+    to {
+      background-position: 100% 80%, 0% 20%, 0 0, 0 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-engineering {
+      animation: none;
+    }
   }
 
   /* Focus ring consistent with the instrument-panel aesthetic. */

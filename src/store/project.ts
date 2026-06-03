@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
 import { getProject } from "@/lib/api/projects";
-import { listMembers, type ProjectMember } from "@/lib/api/members";
+import { listMembers, listOrgMembers, type ProjectMember, type OrgMemberRef } from "@/lib/api/members";
 import { useAuth } from "@/store/auth";
 import type { Project, Role } from "@/lib/types";
 
@@ -10,6 +10,7 @@ interface ProjectState {
   project: Project | null;
   role: Role | null; // caller's effective role on this project
   members: ProjectMember[];
+  orgMembers: OrgMemberRef[]; // everyone in the project's org (for assignee picker)
   error: string | null;
   load: (projectId: string) => Promise<void>;
   setProject: (p: Project) => void;
@@ -38,6 +39,7 @@ export const useProject = create<ProjectState>((set, get) => ({
   project: null,
   role: null,
   members: [],
+  orgMembers: [],
   error: null,
 
   load: async (projectId) => {
@@ -48,8 +50,14 @@ export const useProject = create<ProjectState>((set, get) => ({
         set({ loading: false, error: "Project not found or access denied.", project: null });
         return;
       }
-      const [role, members] = await Promise.all([resolveRole(project), listMembers(projectId)]);
-      set({ loading: false, project, role, members });
+      const [role, members, orgMembers] = await Promise.all([
+        resolveRole(project),
+        listMembers(projectId),
+        // Best-effort: non-org-members can't list the org roster (RLS), so fall
+        // back to an empty list rather than failing the whole project load.
+        listOrgMembers(project.orgId).catch(() => [] as OrgMemberRef[]),
+      ]);
+      set({ loading: false, project, role, members, orgMembers });
     } catch (e: any) {
       set({ loading: false, error: e?.message ?? String(e) });
     }
@@ -63,5 +71,5 @@ export const useProject = create<ProjectState>((set, get) => ({
     set({ members: await listMembers(p.id) });
   },
 
-  clear: () => set({ project: null, role: null, members: [], error: null }),
+  clear: () => set({ project: null, role: null, members: [], orgMembers: [], error: null }),
 }));

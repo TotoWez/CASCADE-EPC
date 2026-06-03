@@ -9,7 +9,7 @@ const ROLES: [string, string][] = [
   ["Manager", "Project Manager. Builds the WBS, assigns leaders, dependencies, categories, reports."],
   ["Engineer", "Team Leader. Full control of their subtree; assigns members; can invite Supervisors/Viewers."],
   ["Supervisor", "Team Member (site). Updates status/progress, dependencies & notes on assigned nodes; reports."],
-  ["QA/QC", "Owns the QA gate (Closed / Pending) project-wide. Notes on any node."],
+  ["QAQC", "Owns the QAQC gate (Closed / Pending) project-wide. Notes on any node."],
   ["HSE", "Owns the HSE gate (Complied / Not-Complied). Notes on any node."],
   ["Viewer", "Client / consultant, invite-by-link. Read-only dashboard + reports, optional comments."],
   ["Developer", "Platform support. Full technical access across organizations."],
@@ -66,7 +66,7 @@ export function About() {
           <p className="mt-3 max-w-2xl text-ink-dim">
             CASCADE-EPC is a hierarchical EPC execution tracker for substation, transmission, and
             industrial projects. Teams plan the WBS, track real progress with volume-weighted rollup,
-            manage physical dependencies and blockers, mirror linked work, enforce QA/HSE gates, and
+            manage physical dependencies and blockers, mirror linked work, enforce QAQC/HSE gates, and
             export client-ready reports — all in a fast, SCADA-grade interface.
           </p>
         </div>
@@ -104,7 +104,7 @@ export function About() {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-2xs text-ink-mute">A node is Blocked automatically while any dependency is not Done. QA & HSE gates are owned exclusively by their roles.</p>
+            <p className="mt-3 text-2xs text-ink-mute">A node is Blocked automatically while any dependency is not Done. QAQC & HSE gates are owned exclusively by their roles.</p>
           </Card>
         </div>
 

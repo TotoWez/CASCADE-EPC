@@ -7,6 +7,20 @@ import { toast, errMessage } from "@/store/toast";
 import { SelectedReportPicker } from "./SelectedReportPicker";
 import type { GateScope } from "@/lib/pdf/gatesReport";
 
+/**
+ * Load a report module with one retry. Vite dev can abort the first dynamic
+ * import while it re-optimizes a newly-seen dep, and production can momentarily
+ * miss a chunk right after a deploy — both throw "Failed to fetch dynamically
+ * imported module". A single retry recovers cleanly.
+ */
+async function loadModule<M>(importer: () => Promise<M>): Promise<M> {
+  try {
+    return await importer();
+  } catch {
+    return await importer();
+  }
+}
+
 export function ReportMenu() {
   const project = useProject((s) => s.project);
   const role = useProject((s) => s.role);
@@ -23,7 +37,10 @@ export function ReportMenu() {
   }, []);
 
   if (!project || !can(role, "report.generate")) return null;
-  const gateScope: GateScope = role === "qaqc" ? "qa" : role === "hse" ? "hse" : "both";
+  // QAQC sees only the QAQC gate report, HSE only the HSE one; everyone else
+  // (admin / manager / developer) gets both as separate entries.
+  const showQa = role !== "hse";
+  const showHse = role !== "qaqc";
 
   async function run(fn: () => Promise<void>) {
     setOpen(false);
@@ -37,14 +54,18 @@ export function ReportMenu() {
     }
   }
 
+  const gate = (scope: GateScope) =>
+    run(async () => (await loadModule(() => import("@/lib/pdf/gatesReport"))).gatesReport(project!, nodes, scope));
+
   const items: { label: string; onClick: () => void; show: boolean }[] = [
-    { label: "Full WBS", show: true, onClick: () => run(async () => (await import("@/lib/pdf/treeReport")).fullReport(project!, nodes)) },
+    { label: "Full WBS", show: true, onClick: () => run(async () => (await loadModule(() => import("@/lib/pdf/treeReport"))).fullReport(project!, nodes)) },
     { label: "Selected nodes…", show: true, onClick: () => { setOpen(false); setPicker(true); } },
-    { label: "Progress", show: true, onClick: () => run(async () => (await import("@/lib/pdf/treeReport")).progressReport(project!, nodes)) },
-    { label: "Notes & RFI", show: true, onClick: () => run(async () => (await import("@/lib/pdf/notesReport")).notesReport(project!, nodes)) },
-    { label: "Gantt", show: true, onClick: () => run(async () => (await import("@/lib/pdf/ganttReport")).ganttReport(project!, nodes)) },
-    { label: gateScope === "both" ? "QA / HSE Gate" : gateScope === "qa" ? "QA Gate" : "HSE Gate", show: true, onClick: () => run(async () => (await import("@/lib/pdf/gatesReport")).gatesReport(project!, nodes, gateScope)) },
-    { label: "Flowchart", show: can(role, "report.flowchart"), onClick: () => run(async () => (await import("@/lib/pdf/flowchartReport")).flowchartReport(project!, nodes)) },
+    { label: "Progress", show: true, onClick: () => run(async () => (await loadModule(() => import("@/lib/pdf/treeReport"))).progressReport(project!, nodes)) },
+    { label: "Notes & RFI", show: true, onClick: () => run(async () => (await loadModule(() => import("@/lib/pdf/notesReport"))).notesReport(project!, nodes)) },
+    { label: "Gantt", show: true, onClick: () => run(async () => (await loadModule(() => import("@/lib/pdf/ganttReport"))).ganttReport(project!, nodes)) },
+    { label: "QAQC Gate", show: showQa, onClick: () => gate("qa") },
+    { label: "HSE Gate", show: showHse, onClick: () => gate("hse") },
+    { label: "Flowchart", show: can(role, "report.flowchart"), onClick: () => run(async () => (await loadModule(() => import("@/lib/pdf/flowchartReport"))).flowchartReport(project!, nodes)) },
   ];
 
   return (

@@ -30,7 +30,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   manager: "Manager",
   engineer: "Engineer",
   supervisor: "Supervisor",
-  qaqc: "QA/QC",
+  qaqc: "QAQC",
   hse: "HSE",
   viewer: "Viewer",
 };

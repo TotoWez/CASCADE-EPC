@@ -38,7 +38,7 @@ export function Onboarding() {
       <div className="mb-5 flex items-start gap-2 rounded border border-line bg-canvas px-3 py-2">
         <ShieldCheck size={16} className="mt-0.5 shrink-0 text-brand-blue" />
         <p className="text-2xs text-ink-dim">
-          As Admin you can create projects and invite Managers, Engineers, Supervisors, QA/QC, HSE,
+          As Admin you can create projects and invite Managers, Engineers, Supervisors, QAQC, HSE,
           and Viewers.
         </p>
       </div>

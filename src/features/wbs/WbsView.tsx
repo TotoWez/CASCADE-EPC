@@ -1,8 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTree } from "@/store/tree";
 import { TreeCanvas } from "./TreeCanvas";
 import { Inspector } from "./Inspector";
 import { BulkEditPanel } from "./BulkEditPanel";
+
+const MIN_W = 320;
+const MAX_W = 760;
+const WIDTH_KEY = "cascade.inspectorW";
+
+function readPanelWidth(): number {
+  if (typeof localStorage === "undefined") return 384;
+  const v = Number(localStorage.getItem(WIDTH_KEY));
+  return v >= MIN_W && v <= MAX_W ? v : 384;
+}
 
 function isEditableTarget(el: EventTarget | null): boolean {
   const node = el as HTMLElement | null;
@@ -39,6 +49,44 @@ export function WbsView() {
     return () => window.removeEventListener("keydown", onKey);
   }, [copy, paste]);
 
+  // Resizable inspector pane (desktop). Width persists across sessions.
+  const [panelW, setPanelW] = useState(readPanelWidth);
+  const widthRef = useRef(panelW);
+  const draggingRef = useRef(false);
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      if (!draggingRef.current) return;
+      const w = Math.min(MAX_W, Math.max(MIN_W, window.innerWidth - e.clientX));
+      widthRef.current = w;
+      setPanelW(w);
+    };
+    const onUp = () => {
+      if (!draggingRef.current) return;
+      draggingRef.current = false;
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+      try {
+        localStorage.setItem(WIDTH_KEY, String(Math.round(widthRef.current)));
+      } catch {
+        /* ignore storage failures */
+      }
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, []);
+
+  const startResize = (e: React.PointerEvent) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+  };
+
   const multi = selectedIds.length >= 2;
   const anySel = selectedIds.length >= 1;
   const Pane = multi ? <BulkEditPanel /> : <Inspector />;
@@ -49,7 +97,15 @@ export function WbsView() {
         <TreeCanvas />
       </div>
 
-      <aside className="sticky top-[116px] hidden h-[calc(100vh-116px)] w-[384px] shrink-0 self-start overflow-hidden border-l border-line bg-surface lg:block">
+      <aside
+        style={{ width: panelW }}
+        className="sticky top-[116px] hidden h-[calc(100vh-116px)] shrink-0 self-start overflow-hidden border-l border-line bg-surface lg:block"
+      >
+        <div
+          onPointerDown={startResize}
+          title="Drag to resize"
+          className="absolute left-0 top-0 z-10 h-full w-1.5 cursor-col-resize bg-transparent transition-colors hover:bg-brand-blue/40"
+        />
         {Pane}
       </aside>
 

@@ -69,3 +69,14 @@ export function progressColor(pct: number): string {
   const hue = Math.round(10 + p * 195); // 10 (red-orange) → 205 (blue)
   return `hsl(${hue} 72% 48%)`;
 }
+
+/**
+ * Volume (weight) color: the inverse of progress — low volume cold (blue),
+ * high volume hot (red) — so the two sliders read as opposites at a glance.
+ */
+export function volumeColor(vol: number): string {
+  const v = Math.min(Math.max(vol, 1), 10);
+  const p = (v - 1) / 9; // 0..1
+  const hue = Math.round(205 - p * 195); // 205 (blue) → 10 (red)
+  return `hsl(${hue} 72% 48%)`;
+}

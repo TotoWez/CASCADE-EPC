@@ -14,6 +14,13 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  // Pre-bundle the heavy PDF libs at startup. They are only reached through
+  // dynamic import()s in the report menu; without this, Vite discovers them on
+  // first click, re-optimizes, and aborts the in-flight import — surfacing as
+  // "Failed to fetch dynamically imported module" when generating a report.
+  optimizeDeps: {
+    include: ["jspdf", "jspdf-autotable"],
+  },
   build: {
     outDir: "dist",
     sourcemap: true,

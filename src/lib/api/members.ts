@@ -7,6 +7,7 @@ export interface ProjectMember {
   canComment: boolean;
   name: string;
   email: string;
+  phone: string;
   position: string;
   avatarUrl: string | null;
 }
@@ -15,6 +16,7 @@ export interface OrgMemberRef {
   userId: string;
   name: string;
   email: string;
+  phone: string;
   orgRole: "admin" | "member";
 }
 
@@ -31,11 +33,12 @@ export interface Invitation {
   acceptedAt: string | null;
 }
 
-function pickProfile(p: any): { name: string; email: string; position: string; avatarUrl: string | null } {
+function pickProfile(p: any): { name: string; email: string; phone: string; position: string; avatarUrl: string | null } {
   const prof = Array.isArray(p) ? p[0] : p;
   return {
     name: prof?.full_name ?? "",
     email: prof?.email ?? "",
+    phone: prof?.phone ?? "",
     position: prof?.position ?? "",
     avatarUrl: prof?.avatar_url ?? null,
   };
@@ -45,7 +48,7 @@ export async function listMembers(projectId: string): Promise<ProjectMember[]> {
   // Disambiguate: memberships has two FKs to profiles (user_id, invited_by).
   const { data, error } = await supabase
     .from("memberships")
-    .select("user_id, role, can_comment, profiles!memberships_user_id_fkey(full_name, email, position, avatar_url)")
+    .select("user_id, role, can_comment, profiles!memberships_user_id_fkey(full_name, email, phone, position, avatar_url)")
     .eq("project_id", projectId);
   if (error) throw error;
   return (data as any[]).map((m) => ({
@@ -59,12 +62,12 @@ export async function listMembers(projectId: string): Promise<ProjectMember[]> {
 export async function listOrgMembers(orgId: string): Promise<OrgMemberRef[]> {
   const { data, error } = await supabase
     .from("org_members")
-    .select("user_id, org_role, profiles(full_name, email)")
+    .select("user_id, org_role, profiles(full_name, email, phone)")
     .eq("org_id", orgId);
   if (error) throw error;
   return (data as any[]).map((m) => {
     const prof = pickProfile(m.profiles);
-    return { userId: m.user_id, name: prof.name, email: prof.email, orgRole: m.org_role };
+    return { userId: m.user_id, name: prof.name, email: prof.email, phone: prof.phone, orgRole: m.org_role };
   });
 }
 

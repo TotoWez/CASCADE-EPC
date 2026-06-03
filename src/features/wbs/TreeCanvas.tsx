@@ -95,10 +95,10 @@ export function TreeCanvas() {
 
   return (
     <div className="bg-engineering">
-      <FilterBar onManageCategories={() => setShowCats(true)} />
+      <FilterBar onAddCategory={can(role, "category.manage") ? () => setShowCats(true) : undefined} />
       {/* toolbar */}
       <div className="flex flex-wrap items-center gap-2 border-b border-line bg-surface/60 px-4 py-2">
-        {canBuild && (
+        {canBuild && roots.length === 0 && (
           <button onClick={addRoot} className="inline-flex items-center gap-1 rounded border border-line bg-surface px-2.5 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink hover:border-ink-mute">
             <Plus size={14} /> Root
           </button>
@@ -154,7 +154,11 @@ export function TreeCanvas() {
       </div>
 
       <div ref={scrollRef} className="overflow-auto">
-        <div className="p-4" style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: `${100 / zoom}%` }}>
+        <div
+          className="min-h-[60vh] p-4"
+          style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: `${100 / zoom}%` }}
+          onClick={(e) => { if (!(e.target as HTMLElement).closest("[data-node-id]")) t.clearSelection(); }}
+        >
           {roots.length === 0 ? (
             <div className="rounded-card border border-dashed border-line bg-surface p-12 text-center">
               <p className="text-sm text-ink-dim">No WBS yet.{canBuild ? " Add a root node to begin." : ""}</p>

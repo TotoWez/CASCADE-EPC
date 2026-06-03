@@ -10,7 +10,7 @@ export type GateScope = "qa" | "hse" | "both";
 export async function gatesReport(project: Project, nodes: WbsNode[], scope: GateScope = "both") {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const markPng = await getMarkPng();
-  const title = scope === "qa" ? "QA Gate Report" : scope === "hse" ? "HSE Gate Report" : "QA / HSE Gate Report";
+  const title = scope === "qa" ? "QAQC Gate Report" : scope === "hse" ? "HSE Gate Report" : "QAQC / HSE Gate Report";
   const startY = drawHeader(doc, project, title, markPng);
 
   const rel = nodes.filter((n) =>
@@ -20,9 +20,9 @@ export async function gatesReport(project: Project, nodes: WbsNode[], scope: Gat
   rel.sort((a, b) => Number(b.qaGate === "open" || b.hseGate === "not_complied") - Number(a.qaGate === "open" || a.hseGate === "not_complied"));
 
   const head =
-    scope === "qa" ? [["Node", "Title", "QA Gate"]]
+    scope === "qa" ? [["Node", "Title", "QAQC Gate"]]
       : scope === "hse" ? [["Node", "Title", "HSE Gate"]]
-        : [["Node", "Title", "QA Gate", "HSE Gate"]];
+        : [["Node", "Title", "QAQC Gate", "HSE Gate"]];
 
   const body = rel.map((n) => {
     const base = [n.nodeCode, sanitize(n.title)];
@@ -51,5 +51,5 @@ export async function gatesReport(project: Project, nodes: WbsNode[], scope: Gat
   }
 
   drawFooter(doc, project);
-  doc.save(reportFilename(project, scope === "qa" ? "QA-Gate" : scope === "hse" ? "HSE-Gate" : "Gate"));
+  doc.save(reportFilename(project, scope === "qa" ? "QAQC-Gate" : scope === "hse" ? "HSE-Gate" : "Gate"));
 }

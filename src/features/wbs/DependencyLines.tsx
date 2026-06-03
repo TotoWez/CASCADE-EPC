@@ -31,26 +31,35 @@ export function DependencyLines() {
     const rectOf = (id: string) =>
       document.querySelector(`[data-node-id="${id}"]`)?.getBoundingClientRect() ?? null;
 
+    // Connect from the horizontal centre of one card to the other, leaving from
+    // the vertical edge that faces the target so the line runs vertically.
+    const edge = (from: DOMRect, to: DOMRect) => {
+      const x1 = from.left + from.width / 2;
+      const x2 = to.left + to.width / 2;
+      const fromAbove = from.top + from.height / 2 <= to.top + to.height / 2;
+      const y1 = fromAbove ? from.bottom : from.top;
+      const y2 = fromAbove ? to.top : to.bottom;
+      return { x1, y1, x2, y2 };
+    };
+
     const compute = () => {
       raf = 0;
       const sel = rectOf(selectedId);
       const node = nodeMap[selectedId];
       if (!sel || !node) return setLines([]);
       const out: Line[] = [];
-      const selL = { x: sel.left, y: sel.top + sel.height / 2 };
-      const selR = { x: sel.right, y: sel.top + sel.height / 2 };
 
-      // blockers (this node depends on them): blocker.right → selected.left
+      // blockers (this node depends on them): blocker.center → selected.center
       for (const depId of node.dependencies) {
         const r = rectOf(depId);
-        if (r) out.push({ key: `b-${depId}`, x1: r.right, y1: r.top + r.height / 2, x2: selL.x, y2: selL.y, kind: "blocker" });
+        if (r) out.push({ key: `b-${depId}`, ...edge(r, sel), kind: "blocker" });
       }
-      // linked peers: selected.right → peer.left
+      // linked peers: selected.center → peer.center
       if (node.clusterId) {
         for (const peer of nodes) {
           if (peer.clusterId === node.clusterId && peer.id !== node.id) {
             const r = rectOf(peer.id);
-            if (r) out.push({ key: `l-${peer.id}`, x1: selR.x, y1: selR.y, x2: r.left, y2: r.top + r.height / 2, kind: "link" });
+            if (r) out.push({ key: `l-${peer.id}`, ...edge(sel, r), kind: "link" });
           }
         }
       }
@@ -83,11 +92,11 @@ export function DependencyLines() {
         </marker>
       </defs>
       {lines.map((l) => {
-        const mx = (l.x1 + l.x2) / 2;
+        const my = (l.y1 + l.y2) / 2;
         return (
           <path
             key={l.key}
-            d={`M ${l.x1} ${l.y1} C ${mx} ${l.y1}, ${mx} ${l.y2}, ${l.x2} ${l.y2}`}
+            d={`M ${l.x1} ${l.y1} C ${l.x1} ${my}, ${l.x2} ${my}, ${l.x2} ${l.y2}`}
             fill="none"
             stroke={l.kind === "blocker" ? "#E5484D" : "#0057FF"}
             strokeWidth={1.6}
