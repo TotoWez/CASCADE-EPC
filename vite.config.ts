@@ -23,7 +23,8 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    sourcemap: true,
+    // No production source maps — keep app source out of the public bundle.
+    sourcemap: false,
     // jsPDF + report builders are heavy; split them off the main bundle.
     rollupOptions: {
       output: {
