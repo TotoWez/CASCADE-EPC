@@ -225,7 +225,14 @@ export const useTree = create<TreeState>((set, get) => ({
     }
     const snapshot = nodes
       .filter((n) => setIds.has(n.id))
-      .map((n) => ({ ...n, dependencies: [...n.dependencies], notes: n.notes.map((x) => ({ ...x })) }));
+      // Deep-clone nested structures so later edits/deletes (e.g. removing an
+      // attachment) can't mutate what's sitting in the clipboard.
+      .map((n) => ({
+        ...n,
+        assignee: { ...n.assignee },
+        dependencies: [...n.dependencies],
+        notes: n.notes.map((x) => ({ ...x, attachments: x.attachments.map((a) => ({ ...a })) })),
+      }));
     set({ clipboard: { nodes: snapshot, withKids } });
     if (projectId) void nodesApi.logActivity(projectId, "copy", `Copied ${snapshot.length} node(s)`);
     toast.info(`Copied ${snapshot.length} node(s)${withKids ? " with children" : ""}.`);

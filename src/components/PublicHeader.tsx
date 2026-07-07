@@ -97,6 +97,12 @@ export function PublicFooter() {
           <Link to="/about" className="font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
             About & Contact
           </Link>
+          <Link to="/privacy" className="font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
+            Privacy
+          </Link>
+          <Link to="/terms" className="font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
+            Terms
+          </Link>
         </nav>
       </div>
     </footer>

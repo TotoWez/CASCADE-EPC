@@ -147,16 +147,21 @@ export interface NodePatch {
   assignee?: { name?: string; email?: string; phone?: string };
 }
 
+/** Clamp helper — keeps out-of-range values (buggy callers, crafted requests)
+ *  from ever reaching the DB. Mirrors the domain rules: progress 0–100,
+ *  volume 1–10, title ≤ 300 chars. */
+const clampInt = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(v)));
+
 export async function updateNode(id: string, patch: NodePatch): Promise<void> {
   const row: Record<string, unknown> = {};
   const set = (k: string, v: unknown) => v !== undefined && (row[k] = v);
-  set("title", patch.title);
+  set("title", patch.title === undefined ? undefined : patch.title.slice(0, 300));
   set("node_code", patch.nodeCode);
   set("category", patch.category);
   set("priority", patch.priority);
   set("work_status", patch.workStatus);
-  set("progress", patch.progress);
-  set("volume", patch.volume);
+  set("progress", patch.progress === undefined ? undefined : clampInt(patch.progress, 0, 100));
+  set("volume", patch.volume === undefined ? undefined : clampInt(patch.volume, 1, 10));
   set("start_date", patch.startDate);
   set("due_date", patch.dueDate);
   set("parent_id", patch.parentId);

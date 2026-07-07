@@ -1,0 +1,24 @@
+{
+  "name": "CASCADE-EPC",
+  "short_name": "CASCADE-EPC",
+  "description": "Hierarchical EPC execution tracker. Plan it. Track it. CASCADE it.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0F1723",
+  "theme_color": "#0F1723",
+  "icons": [
+    {
+      "src": "/brand/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "4096x4096",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

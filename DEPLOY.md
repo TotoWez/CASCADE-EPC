@@ -48,3 +48,19 @@ npm install
 cp .env.example .env.local   # fill VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 npm run dev
 ```
+
+## Ops (production)
+
+- **Backups:** Supabase free tier has no point-in-time recovery. Weekly habit:
+  open each active project → Control → **Export WBS (JSON)** and keep the file
+  (attachments live in Storage; re-download anything critical). For a full DB
+  dump use Supabase Dashboard → Database → Backups, or `pg_dump` via the
+  connection string.
+- **Uptime monitoring:** add a free ping on `https://cascade-epc.com/` (e.g.
+  UptimeRobot, 5-min interval) so you learn about outages before users do.
+- **Error monitoring:** create a free Sentry project and set `VITE_SENTRY_DSN`
+  in Cloudflare Pages env (Production) — the app only loads Sentry when the
+  var is present.
+- **Plan limits** are enforced in the database (migration `0011`): projects /
+  member seats / nodes-per-project / snapshot history / attachment size + MIME
+  + org storage, per `organizations.subscription_tier` (default `free`).

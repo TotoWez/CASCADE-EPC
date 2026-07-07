@@ -25,6 +25,13 @@ jobs:
       - name: Type-check + build
         run: npm run build
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
       - name: Unit tests (Vitest)
         run: npm run test
 
@@ -32,8 +39,13 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E (backend-free)
-        # e2e/app/** skips automatically without E2E_TEST_* secrets.
         run: npx playwright test e2e/public
+
+      - name: Note skipped backend E2E
+        # e2e/app/** requires E2E_TEST_EMAIL / E2E_TEST_PASSWORD secrets and a
+        # Supabase-backed environment — intentionally NOT run in CI. Run
+        # locally with the secrets set to exercise the per-role journeys.
+        run: echo "::notice::Backend e2e (e2e/app) skipped — no E2E_TEST_* secrets configured."
 
       - name: Upload Playwright report on failure
         if: failure()

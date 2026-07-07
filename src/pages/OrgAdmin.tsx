@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { useAuth } from "@/store/auth";
 import { getOrg, updateOrg, uploadBranding, usageStats, type Org, type UsageStats } from "@/lib/api/org";
+import { PLANS, type Plan } from "@/lib/plans";
 import { toast, errMessage } from "@/store/toast";
 
-const FREE_CAPS = { nodes: 5000, storageMB: 1024, dbMB: 500 };
+function planFor(tier: string | undefined): Plan {
+  return PLANS.find((p) => p.id === (tier ?? "free")) ?? PLANS[0]!;
+}
 
 export function OrgAdmin() {
   const orgs = useAuth((s) => s.orgs);
@@ -96,18 +99,25 @@ export function OrgAdmin() {
               <Button onClick={onSaveName} loading={busy} className="self-end">Save</Button>
             </div>
 
-            <h2 className="mt-10 font-mono text-2xs uppercase tracking-widest text-ink-mute">Usage · free tier</h2>
-            <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-4">
-              <Kpi label="Projects" value={usage?.projects ?? 0} />
-              <Kpi label="Members" value={usage?.members ?? 0} />
-              <Kpi label="Nodes" value={usage?.nodes ?? 0} sub={`/ ${FREE_CAPS.nodes}`} />
-              <Kpi label="Snapshots" value={usage?.snapshots ?? 0} />
+            <h2 className="mt-10 font-mono text-2xs uppercase tracking-widest text-ink-mute">
+              Usage · {planFor(org?.subscriptionTier).name} plan
+            </h2>
+            <div className="mt-3 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2">
+              <Meter label="Projects" used={usage?.projects ?? 0} cap={planFor(org?.subscriptionTier).limits.projects} />
+              <Meter label="Member seats" used={usage?.members ?? 0} cap={planFor(org?.subscriptionTier).limits.members} />
+              <Meter label="Snapshots" used={usage?.snapshots ?? 0} cap={planFor(org?.subscriptionTier).limits.snapshots} />
+              <Meter
+                label="Attachment storage"
+                used={Math.round((usage?.storageBytes ?? 0) / 1024 / 1024)}
+                cap={planFor(org?.subscriptionTier).limits.storageGb === null ? null : planFor(org?.subscriptionTier).limits.storageGb! * 1024}
+                unit="MB"
+              />
             </div>
             <p className="mt-3 text-2xs text-ink-mute">
-              Free tier: {FREE_CAPS.dbMB} MB database · {FREE_CAPS.storageMB} MB storage · 50k monthly active users.
-              The project pauses after ~7 days of inactivity (mitigated by the keep-alive job).
+              {usage?.nodes ?? 0} nodes across all projects (cap is per project:{" "}
+              {planFor(org?.subscriptionTier).limits.nodesPerProject ?? "unlimited"}). Need more room?{" "}
+              <Link to="/pricing" className="text-brand-blue hover:underline">See plans</Link>.
             </p>
-            <p className="mt-2 text-2xs text-ink-mute">Subscription: {org?.subscriptionTier ?? "free"}.</p>
           </>
         )}
       </div>
@@ -115,14 +125,24 @@ export function OrgAdmin() {
   );
 }
 
-function Kpi({ label, value, sub }: { label: string; value: number; sub?: string }) {
+/** Usage vs plan-cap meter. `cap` null = unlimited (no bar). */
+function Meter({ label, used, cap, unit }: { label: string; used: number; cap: number | null; unit?: string }) {
+  const pct = cap ? Math.min(100, Math.round((used / cap) * 100)) : 0;
+  const barColor = pct >= 90 ? "bg-status-blocked" : pct >= 70 ? "bg-brand-orange" : "bg-brand-blue";
   return (
     <div className="bg-surface px-4 py-3">
-      <p className="font-brand text-2xs uppercase tracking-widest text-ink-mute">{label}</p>
-      <p className="mt-1 font-mono text-xl text-ink">
-        {value}
-        {sub && <span className="ml-1 text-2xs text-ink-mute">{sub}</span>}
-      </p>
+      <div className="flex items-baseline justify-between">
+        <p className="font-brand text-2xs uppercase tracking-widest text-ink-mute">{label}</p>
+        <p className="font-mono text-sm text-ink">
+          {used.toLocaleString()}
+          <span className="text-2xs text-ink-mute"> / {cap === null ? "∞" : cap.toLocaleString()}{unit ? ` ${unit}` : ""}</span>
+        </p>
+      </div>
+      {cap !== null && (
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+          <div className={`h-full ${barColor}`} style={{ width: `${pct}%` }} />
+        </div>
+      )}
     </div>
   );
 }

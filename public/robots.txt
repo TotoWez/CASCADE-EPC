@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /app/
+Disallow: /join
+Disallow: /reset
+Disallow: /forgot
+
+Sitemap: https://cascade-epc.com/sitemap.xml

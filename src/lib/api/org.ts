@@ -14,6 +14,8 @@ export interface UsageStats {
   members: number;
   nodes: number;
   snapshots: number;
+  /** Total attachment bytes across the org (plan meter). */
+  storageBytes: number;
 }
 
 export async function getOrg(orgId: string): Promise<Org | null> {
@@ -68,10 +70,21 @@ export async function usageStats(orgId: string): Promise<UsageStats> {
     return count ?? 0;
   };
 
-  const [members, nodes, snapshots] = await Promise.all([
+  const sumStorage = async (): Promise<number> => {
+    if (projectIds.length === 0) return 0;
+    const { data } = await supabase
+      .from("note_attachments")
+      .select("size")
+      .in("project_id", projectIds)
+      .limit(10_000);
+    return ((data as { size: number }[] | null) ?? []).reduce((s, a) => s + (a.size || 0), 0);
+  };
+
+  const [members, nodes, snapshots, storageBytes] = await Promise.all([
     countOf("memberships"),
     countOf("nodes"),
     countOf("snapshots"),
+    sumStorage(),
   ]);
-  return { projects: projectIds.length, members, nodes, snapshots };
+  return { projects: projectIds.length, members, nodes, snapshots, storageBytes };
 }

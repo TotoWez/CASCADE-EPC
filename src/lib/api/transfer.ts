@@ -1,5 +1,5 @@
 import type { Project, WbsNode, Priority, WorkStatus, QaGate, HseGate } from "@/lib/types";
-import { createNode, updateNode, addDependency } from "@/lib/api/nodes";
+import { createNode, updateNode, deleteNode, addDependency } from "@/lib/api/nodes";
 import { addNote, updateNote } from "@/lib/api/notes";
 import { addCategory } from "@/lib/api/categories";
 import { clamp, clampVolume } from "@/lib/domain/rollup";
@@ -106,22 +106,33 @@ export async function importProjectData(
   while (queue.length) { const n = queue.shift()!; ordered.push(n); queue.push(...(byParent.get(n.id) ?? [])); }
 
   const idMap = new Map<string, string>();
-  for (const n of ordered) {
-    const parent = n.parentId && setIds.has(n.parentId) ? idMap.get(n.parentId)! : null;
-    const created = await createNode({ projectId, nodeCode: freshCode(n.nodeCode), parentId: parent, title: n.title, category: n.category, priority: n.priority, volume: n.volume, orderIndex: n.orderIndex });
-    idMap.set(n.id, created.id);
-    await updateNode(created.id, { progress: n.progress, workStatus: n.workStatus, startDate: n.startDate, dueDate: n.dueDate, assignee: n.assignee });
+  try {
+    for (const n of ordered) {
+      const parent = n.parentId && setIds.has(n.parentId) ? idMap.get(n.parentId)! : null;
+      const created = await createNode({ projectId, nodeCode: freshCode(n.nodeCode), parentId: parent, title: n.title, category: n.category, priority: n.priority, volume: n.volume, orderIndex: n.orderIndex });
+      idMap.set(n.id, created.id);
+      await updateNode(created.id, { progress: n.progress, workStatus: n.workStatus, startDate: n.startDate, dueDate: n.dueDate, assignee: n.assignee });
+    }
+    for (const n of ordered) {
+      const newId = idMap.get(n.id)!;
+      for (const dep of n.dependencies) if (setIds.has(dep)) await addDependency(projectId, newId, idMap.get(dep)!);
+    }
+    const groups = new Map<string, string[]>();
+    for (const n of ordered) if (n.clusterId) (groups.get(n.clusterId) ?? groups.set(n.clusterId, []).get(n.clusterId)!).push(idMap.get(n.id)!);
+    for (const [, ids] of groups) if (ids.length >= 2) { const cid = crypto.randomUUID(); for (const id of ids) await updateNode(id, { clusterId: cid }); }
+    for (const n of ordered) {
+      const newId = idMap.get(n.id)!;
+      for (const note of n.notes) { const c = await addNote(projectId, newId, note.source, note.text); if (note.checked) await updateNote(c.id, { checked: true }); }
+    }
+    return ordered.length;
+  } catch (e) {
+    // Best-effort rollback: remove everything this import created so a mid-way
+    // failure (network, plan limit) doesn't leave a half-imported tree.
+    // Reverse creation order = children before parents.
+    const createdIds = [...idMap.values()].reverse();
+    for (const id of createdIds) {
+      try { await deleteNode(id); } catch { /* parent cascade may have removed it */ }
+    }
+    throw e;
   }
-  for (const n of ordered) {
-    const newId = idMap.get(n.id)!;
-    for (const dep of n.dependencies) if (setIds.has(dep)) await addDependency(projectId, newId, idMap.get(dep)!);
-  }
-  const groups = new Map<string, string[]>();
-  for (const n of ordered) if (n.clusterId) (groups.get(n.clusterId) ?? groups.set(n.clusterId, []).get(n.clusterId)!).push(idMap.get(n.id)!);
-  for (const [, ids] of groups) if (ids.length >= 2) { const cid = crypto.randomUUID(); for (const id of ids) await updateNode(id, { clusterId: cid }); }
-  for (const n of ordered) {
-    const newId = idMap.get(n.id)!;
-    for (const note of n.notes) { const c = await addNote(projectId, newId, note.source, note.text); if (note.checked) await updateNote(c.id, { checked: true }); }
-  }
-  return ordered.length;
 }

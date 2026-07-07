@@ -24,7 +24,7 @@ async function openAttachment(att: NoteAttachment) {
   try {
     const url = await attachmentUrl(att.storagePath);
     if (opensInTab(attachmentKind(att.fileName, att.mime))) {
-      window.open(url, "_blank", "noopener");
+      window.open(url, "_blank", "noopener,noreferrer");
     } else {
       const a = document.createElement("a");
       a.href = url;

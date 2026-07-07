@@ -7,6 +7,7 @@ import { ResetPassword } from "@/pages/ResetPassword";
 import { Join } from "@/pages/Join";
 import { About } from "@/pages/About";
 import { Pricing } from "@/pages/Pricing";
+import { Privacy, Terms } from "@/pages/Legal";
 import { AppHome } from "@/pages/AppHome";
 import { Profile } from "@/pages/Profile";
 import { OrgAdmin } from "@/pages/OrgAdmin";
@@ -22,6 +23,8 @@ export const router = createBrowserRouter([
   { path: "/join", element: <Join /> },
   { path: "/about", element: <About /> },
   { path: "/pricing", element: <Pricing /> },
+  { path: "/privacy", element: <Privacy /> },
+  { path: "/terms", element: <Terms /> },
 
   // Authenticated app (workspace + org/project routes are added in P3+).
   { path: "/app", element: <RequireAuth><AppHome /></RequireAuth> },

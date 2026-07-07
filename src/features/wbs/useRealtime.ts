@@ -29,7 +29,12 @@ export function useRealtime(projectId: string | null) {
 
     return () => {
       if (timer) clearTimeout(timer);
-      void supabase.removeChannel(channel);
+      // Unsubscribe first so no event can fire mid-teardown, then drop the
+      // channel; both are async — surface (but don't throw) cleanup failures.
+      void channel
+        .unsubscribe()
+        .then(() => supabase.removeChannel(channel))
+        .catch(() => undefined);
     };
   }, [projectId]);
 }
