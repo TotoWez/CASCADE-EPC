@@ -18,7 +18,7 @@ export function Toaster() {
   const toasts = useToasts((s) => s.toasts);
   const dismiss = useToasts((s) => s.dismiss);
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[100] flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
+    <div className="pointer-events-none fixed bottom-2 right-2 z-[100] flex w-80 max-w-[calc(100vw-1rem)] flex-col gap-2 sm:bottom-4 sm:right-4 sm:max-w-[calc(100vw-2rem)]">
       {toasts.map((t) => {
         const Icon = ICON[t.kind];
         return (

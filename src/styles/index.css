@@ -97,6 +97,38 @@
     }
   }
 
+  /* One-shot entrance for hero / section content. Stagger with .rise-in-1..4. */
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .rise-in {
+    animation: rise-in 0.55s ease-out both;
+  }
+  .rise-in-1 {
+    animation-delay: 0.08s;
+  }
+  .rise-in-2 {
+    animation-delay: 0.16s;
+  }
+  .rise-in-3 {
+    animation-delay: 0.24s;
+  }
+  .rise-in-4 {
+    animation-delay: 0.32s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rise-in {
+      animation: none;
+    }
+  }
+
   /* Focus ring consistent with the instrument-panel aesthetic. */
   *:focus-visible {
     @apply outline-none ring-2 ring-brand-blue/70 ring-offset-1 ring-offset-canvas;
@@ -119,6 +151,75 @@
   .count-badge {
     @apply font-mono text-2xs px-1.5 py-0.5 rounded bg-surface-2 text-ink-dim;
   }
+
+  /* Toolbar / nav chips — the shared instrument-panel link & button style
+     (previously copy-pasted across Landing / Pricing / About / AppLayout). */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded border border-line px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim transition-colors hover:border-ink-mute hover:text-ink;
+  }
+  .chip-solid {
+    @apply inline-flex items-center gap-1.5 rounded bg-brand-blue px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-white transition-colors hover:bg-brand-blue-dark;
+  }
+  .chip-ghost {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim transition-colors hover:text-ink;
+  }
+}
+
+/* ============================================================
+   Range sliders — instrument-panel style, cross-browser.
+   Color via --slider-c and fill percent via --slider-fill, set
+   inline by callers (Inspector progress/volume); falls back to
+   the accent token.
+   ============================================================ */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--line));
+  background: linear-gradient(
+    to right,
+    var(--slider-c, rgb(var(--accent))) var(--slider-fill, 0%),
+    rgb(var(--surface-2)) var(--slider-fill, 0%)
+  );
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -6px;
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  background: var(--slider-c, rgb(var(--accent)));
+  border: 2px solid rgb(var(--canvas));
+  box-shadow: 0 0 0 1px rgb(var(--line));
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--line));
+  background: rgb(var(--surface-2));
+}
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--slider-c, rgb(var(--accent)));
+}
+input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  background: var(--slider-c, rgb(var(--accent)));
+  border: 2px solid rgb(var(--canvas));
+  box-shadow: 0 0 0 1px rgb(var(--line));
 }
 
 /* ============================================================

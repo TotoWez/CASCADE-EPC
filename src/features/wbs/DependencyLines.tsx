@@ -85,10 +85,11 @@ export function DependencyLines() {
     <svg className="pointer-events-none fixed inset-0 z-20 h-full w-full" width="100%" height="100%">
       <defs>
         <marker id="dep-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="#E5484D" />
+          {/* Status/brand tokens via fill-* classes so a palette change propagates. */}
+          <path d="M0,0 L8,4 L0,8 Z" className="fill-status-blocked" />
         </marker>
         <marker id="link-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <circle cx="4" cy="4" r="3" fill="#0057FF" />
+          <circle cx="4" cy="4" r="3" className="fill-brand-blue" />
         </marker>
       </defs>
       {lines.map((l) => {
@@ -98,7 +99,7 @@ export function DependencyLines() {
             key={l.key}
             d={`M ${l.x1} ${l.y1} C ${l.x1} ${my}, ${l.x2} ${my}, ${l.x2} ${l.y2}`}
             fill="none"
-            stroke={l.kind === "blocker" ? "#E5484D" : "#0057FF"}
+            className={l.kind === "blocker" ? "stroke-status-blocked" : "stroke-brand-blue"}
             strokeWidth={1.6}
             strokeDasharray={l.kind === "blocker" ? "5 4" : undefined}
             markerEnd={l.kind === "blocker" ? "url(#dep-arrow)" : "url(#link-arrow)"}

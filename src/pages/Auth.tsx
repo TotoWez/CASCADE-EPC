@@ -18,6 +18,7 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
 
   // Navigate to the app only once the auth store has actually loaded the
   // session — avoids a race where navigating immediately after signIn() bounces
@@ -26,8 +27,19 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
     if (status === "authed") navigate("/app", { replace: true });
   }, [status, navigate]);
 
+  /** Inline validation surfaced under the fields (not just browser bubbles). */
+  function validate(): boolean {
+    const next: typeof errors = {};
+    if (isSignup && !fullName.trim()) next.name = "Enter your full name.";
+    if (!/\S+@\S+\.\S+/.test(email)) next.email = "Enter a valid email address.";
+    if (isSignup && password.length < 8) next.password = "Password must be at least 8 characters.";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     if (!env.hasSupabase) {
       toast.error("Supabase is not configured. Add VITE_SUPABASE_URL and anon key to .env.local.");
       return;
@@ -92,29 +104,36 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {isSignup && (
-          <Field label="Full name" htmlFor="name">
+          <Field label="Full name" htmlFor="name" error={errors.name}>
             <Input
               id="name"
               autoComplete="name"
               required
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                if (errors.name) setErrors((p) => ({ ...p, name: undefined }));
+              }}
             />
           </Field>
         )}
-        <Field label="Work email" htmlFor="email">
+        <Field label="Work email" htmlFor="email" error={errors.email}>
           <Input
             id="email"
             type="email"
             autoComplete="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
+            }}
           />
         </Field>
         <Field
           label="Password"
           htmlFor="password"
+          error={errors.password}
           hint={isSignup ? "At least 8 characters." : undefined}
         >
           <Input
@@ -124,7 +143,10 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
             required
             minLength={8}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors((p) => ({ ...p, password: undefined }));
+            }}
           />
         </Field>
         <Button type="submit" loading={busy} className="w-full">

@@ -7,6 +7,7 @@ import { can } from "@/lib/permissions";
 import { ROLE_LABEL } from "@/lib/types";
 import { listInvitations, deleteInvitation, removeMember, type Invitation } from "@/lib/api/members";
 import { useAuth } from "@/store/auth";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 
 export function TeamPanel() {
@@ -34,7 +35,15 @@ export function TeamPanel() {
   }, [project.id]);
 
   async function onRemove(userId: string) {
-    if (!confirm("Remove this member from the project?")) return;
+    if (
+      !(await confirmDialog({
+        title: "Remove member",
+        message: "Remove this member from the project?",
+        confirmLabel: "Remove",
+        danger: true,
+      }))
+    )
+      return;
     try {
       await removeMember(project.id, userId);
       await reloadMembers();

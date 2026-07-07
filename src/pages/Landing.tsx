@@ -8,8 +8,7 @@ import {
   GaugeCircle,
   ArrowRight,
 } from "lucide-react";
-import { Brand } from "@/components/Brand";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { PublicHeader, PublicFooter } from "@/components/PublicHeader";
 
 const FEATURES = [
   {
@@ -54,58 +53,26 @@ const STATUS_MODEL = [
 export function Landing() {
   return (
     <div className="min-h-full bg-canvas text-ink">
-      {/* Top bar */}
-      <header className="sticky top-0 z-30 border-b border-line bg-canvas/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
-          <Brand size={30} />
-          <nav className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/pricing"
-              className="hidden px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink sm:inline-block"
-            >
-              Pricing
-            </Link>
-            <Link
-              to="/about"
-              className="hidden px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink sm:inline-block"
-            >
-              About
-            </Link>
-            <ThemeToggle />
-            <Link
-              to="/signin"
-              className="rounded border border-line px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:border-ink-mute hover:text-ink"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/signup"
-              className="rounded bg-brand-blue px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-white hover:bg-brand-blue-dark"
-            >
-              Sign up
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line bg-engineering">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-canvas/40 to-canvas" />
         <div className="relative mx-auto max-w-6xl px-4 py-24 text-center">
-          <p className="font-mono text-2xs uppercase tracking-[0.35em] text-brand-blue-light">
+          <p className="rise-in font-mono text-2xs uppercase tracking-[0.35em] text-brand-blue-light">
             EPC Execution Tracking
           </p>
-          <h1 className="mx-auto mt-4 max-w-3xl font-brand text-4xl leading-tight tracking-tight text-ink sm:text-6xl">
+          <h1 className="rise-in rise-in-1 mx-auto mt-4 max-w-3xl font-brand text-4xl leading-tight tracking-tight text-ink sm:text-6xl">
             Plan it. Track it.{" "}
             <span className="text-brand-blue">CASCADE</span> it.
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base text-ink-dim sm:text-lg">
+          <p className="rise-in rise-in-2 mx-auto mt-6 max-w-2xl text-base text-ink-dim sm:text-lg">
             A hierarchical execution tracker for substation, transmission, and
             industrial projects. Plan the WBS, track real progress, manage
             dependencies, surface blockers, and export client-ready reports —
             with engineering-grade precision.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-3">
+          <div className="rise-in rise-in-3 mt-10 flex items-center justify-center gap-3">
             <Link
               to="/signup"
               className="inline-flex items-center gap-2 rounded bg-brand-blue px-5 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-brand-blue-dark"
@@ -158,21 +125,7 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
-          <Brand size={24} />
-          <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">
-            © {new Date().getFullYear()} CASCADE-EPC · cascade-epc.com
-          </p>
-          <Link
-            to="/about"
-            className="font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink"
-          >
-            About & Contact
-          </Link>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

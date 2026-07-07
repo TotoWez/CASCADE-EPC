@@ -7,7 +7,9 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
       <input
         ref={ref}
         className={clsx(
-          "w-full rounded border border-line bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-mute focus:border-brand-blue",
+          // Focus styling comes from the global *:focus-visible ring (index.css)
+          // so inputs match every other focusable control.
+          "w-full rounded border border-line bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-mute disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
         {...rest}

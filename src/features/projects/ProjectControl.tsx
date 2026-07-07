@@ -7,6 +7,7 @@ import { useTree } from "@/store/tree";
 import { can } from "@/lib/permissions";
 import { listOrgMembers, type OrgMemberRef } from "@/lib/api/members";
 import { exportProjectData, downloadJson, importProjectData } from "@/lib/api/transfer";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 import type { Project } from "@/lib/types";
 
@@ -46,7 +47,15 @@ export function ProjectControl() {
     try {
       const data = JSON.parse(await file.text());
       const count = tree.nodes.length;
-      if (count > 0 && !confirm(`Import will ADD nodes to this project (currently ${count}). Continue?`)) return;
+      if (
+        count > 0 &&
+        !(await confirmDialog({
+          title: "Import WBS",
+          message: `Import will ADD nodes to this project (currently ${count}). Continue?`,
+          confirmLabel: "Import",
+        }))
+      )
+        return;
       const created = await importProjectData(project.id, data, new Set(tree.nodes.map((n) => n.nodeCode)));
       await tree.load(project.id);
       toast.success(`Imported ${created} node(s).`);

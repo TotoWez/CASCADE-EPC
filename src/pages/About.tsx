@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, Keyboard, Users, Activity } from "lucide-react";
-import { Brand } from "@/components/Brand";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { PublicHeader, PublicFooter } from "@/components/PublicHeader";
+import { KEYS } from "@/components/ShortcutsModal";
 
 const ROLES: [string, string][] = [
   ["Admin", "Customer IT. Manages org, branding, projects, parties & dates, assigns a Project Manager."],
@@ -15,16 +15,7 @@ const ROLES: [string, string][] = [
   ["Developer", "Platform support. Full technical access across organizations."],
 ];
 
-const KEYS: [string, string][] = [
-  ["Single-select node", "Click"],
-  ["Toggle multi-select", "Ctrl / Cmd + Click"],
-  ["Copy with descendants", "Ctrl / Cmd + C"],
-  ["Copy without descendants", "Ctrl / Cmd + Shift + C"],
-  ["Paste under selected", "Ctrl / Cmd + V"],
-  ["Zoom tree in / out", "Ctrl / Cmd + Mouse wheel"],
-  ["Close modal / cancel edit", "Escape"],
-  ["Save inline title edit", "Enter / blur"],
-];
+// Keyboard map lives in ShortcutsModal (also shown in-app via the "?" key).
 
 const STATUSES: [string, string][] = [
   ["Not Started", "bg-status-notstarted"],
@@ -47,23 +38,15 @@ function Card({ icon: Icon, title, children }: { icon: typeof Users; title: stri
 export function About() {
   return (
     <div className="min-h-full bg-canvas bg-engineering text-ink">
-      <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link to="/"><Brand size={28} /></Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link to="/signin" className="rounded border border-line px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">Sign in</Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="mx-auto max-w-4xl space-y-6 px-4 py-12">
         <Link to="/" className="inline-flex items-center gap-1 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
           <ArrowLeft size={14} /> Home
         </Link>
         <div>
-          <h1 className="font-brand text-3xl tracking-wide">About CASCADE-EPC</h1>
-          <p className="mt-3 max-w-2xl text-ink-dim">
+          <h1 className="rise-in font-brand text-3xl tracking-wide">About CASCADE-EPC</h1>
+          <p className="rise-in rise-in-1 mt-3 max-w-2xl text-ink-dim">
             CASCADE-EPC is a hierarchical EPC execution tracker for substation, transmission, and
             industrial projects. Teams plan the WBS, track real progress with volume-weighted rollup,
             manage physical dependencies and blockers, mirror linked work, enforce QAQC/HSE gates, and
@@ -118,10 +101,9 @@ export function About() {
           </a>
         </Card>
 
-        <footer className="border-t border-line pt-6 text-center font-mono text-2xs uppercase tracking-widest text-ink-mute">
-          © {new Date().getFullYear()} CASCADE-EPC · Plan it. Track it. CASCADE it.
-        </footer>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

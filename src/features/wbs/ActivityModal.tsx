@@ -10,6 +10,7 @@ import { can } from "@/lib/permissions";
 import { relativeTime } from "@/lib/time";
 import { ROLE_LABEL, type Role } from "@/lib/types";
 import { listActivity, clearActivity, type ActivityRow } from "@/lib/api/activity";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 
 const TYPES = [
@@ -50,7 +51,15 @@ export function ActivityModal({ open, onClose, projectId }: { open: boolean; onC
   }
 
   async function onClear() {
-    if (!confirm("Clear the entire activity timeline? This cannot be undone.")) return;
+    if (
+      !(await confirmDialog({
+        title: "Clear activity",
+        message: "Clear the entire activity timeline? This cannot be undone.",
+        confirmLabel: "Clear all",
+        danger: true,
+      }))
+    )
+      return;
     try {
       await clearActivity(projectId);
       setRows([]);

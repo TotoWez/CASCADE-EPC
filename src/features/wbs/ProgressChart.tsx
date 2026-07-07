@@ -28,11 +28,11 @@ export function ProgressChart({ points }: { points: ChartPoint[] }) {
             <text x={padL - 6} y={y(g) + 3} textAnchor="end" className="fill-ink-mute font-mono" fontSize="9">{g}</text>
           </g>
         ))}
-        <path d={areaPath} fill="#0057FF" opacity={0.12} />
-        <path d={linePath} fill="none" stroke="#0057FF" strokeWidth={2} />
+        <path d={areaPath} className="fill-brand-blue" opacity={0.12} />
+        <path d={linePath} fill="none" className="stroke-brand-blue" strokeWidth={2} />
         {points.map((p, i) => (
           <g key={i}>
-            <circle cx={x(i)} cy={y(p.pct)} r={3} fill="#0057FF" />
+            <circle cx={x(i)} cy={y(p.pct)} r={3} className="fill-brand-blue" />
             <text x={x(i)} y={y(p.pct) - 7} textAnchor="middle" className="fill-ink font-mono" fontSize="9">{p.pct}%</text>
             <text x={x(i)} y={H - 8} textAnchor="middle" className="fill-ink-mute font-mono" fontSize="8">{p.label}</text>
           </g>

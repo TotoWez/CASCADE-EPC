@@ -14,6 +14,7 @@ import { getChildren } from "@/lib/domain/tree";
 import { displayStatus, dueState } from "@/lib/domain/status";
 import { isMatch, matchesSearch, filtersActive } from "@/lib/domain/filter";
 import { siblingAccent } from "@/lib/domain/color";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 import { NodeCard } from "./NodeCard";
 import { FilterBar } from "./FilterBar";
@@ -254,7 +255,14 @@ function SortableNode({ disabled, ...cardProps }: SortableNodeProps) {
         onToggle={() => t.toggleExpand(node.id)}
         onAddChild={() => void t.addChild(node.id).catch((e) => toast.error(errMessage(e)))}
         onDelete={() => {
-          if (confirm(`Delete ${node.nodeCode} and all its children?`)) void t.remove(node.id).catch((e) => toast.error(errMessage(e)));
+          void confirmDialog({
+            title: "Delete node",
+            message: `Delete ${node.nodeCode} and all its children?`,
+            confirmLabel: "Delete",
+            danger: true,
+          }).then((ok) => {
+            if (ok) void t.remove(node.id).catch((e) => toast.error(errMessage(e)));
+          });
         }}
         onRename={(title) => void t.rename(node.id, title).catch((e) => toast.error(errMessage(e)))}
         dragHandle={{ attributes, listeners }}

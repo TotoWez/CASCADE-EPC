@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FolderOpen, Building2, Loader2, CalendarRange } from "lucide-react";
+import { Plus, FolderOpen, Building2, CalendarRange } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/Button";
+import { CardSkeleton } from "@/components/ui/Skeleton";
 import { ProjectForm } from "@/features/projects/ProjectForm";
 import { listProjects } from "@/lib/api/projects";
 import { listOrgMembers, type OrgMemberRef } from "@/lib/api/members";
@@ -66,8 +67,10 @@ export function ProjectsList() {
         </div>
 
         {loading ? (
-          <div className="grid place-items-center py-24">
-            <Loader2 className="animate-spin text-brand-blue" size={26} />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
         ) : projects.length === 0 ? (
           <div className="mt-10 rounded-card border border-dashed border-line bg-surface p-12 text-center">

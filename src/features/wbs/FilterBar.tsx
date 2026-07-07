@@ -4,11 +4,8 @@ import { Search, X, Flag } from "lucide-react";
 import { useTree } from "@/store/tree";
 import { getChildren } from "@/lib/domain/tree";
 import { computeCounts, filtersActive } from "@/lib/domain/filter";
-import { DISPLAY_STATUS_LABEL, STATUS_DOT_CLASS, type DisplayStatus, type Priority } from "@/lib/types";
+import { DISPLAY_STATUS_LABEL, STATUS_DOT_CLASS, PRIORITY_FLAG_CLASS, type DisplayStatus, type Priority } from "@/lib/types";
 import { Input } from "@/components/ui/Input";
-
-// Priority flag colors, mirrored from the node cards (P1 red / P2 orange / P3 gray).
-const PRIORITY_HEX: Record<number, string> = { 1: "#E5484D", 2: "#E07C00", 3: "#79889A" };
 
 function Chip({ active, dim, onClick, children }: { active: boolean; dim?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -65,7 +62,7 @@ export function FilterBar({ onAddCategory }: { onAddCategory?: () => void }) {
 
       {([1, 2, 3] as Priority[]).map((p) => (
         <Chip key={p} active={filters.priorities.has(p)} dim={counts.priorities[p] === 0} onClick={() => togglePriority(p)}>
-          <span className="inline-flex items-center gap-1 font-semibold" style={{ color: PRIORITY_HEX[p] }}><Flag size={9} />P{p}</span>
+          <span className={clsx("inline-flex items-center gap-1 font-semibold", PRIORITY_FLAG_CLASS[p])}><Flag size={9} />P{p}</span>
           <span className="text-ink-mute">{counts.priorities[p]}</span>
         </Chip>
       ))}

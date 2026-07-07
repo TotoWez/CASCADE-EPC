@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 
 type FieldKey = "workStatus" | "progress" | "priority" | "category" | "assigneeName" | "startDate" | "dueDate";
@@ -108,7 +109,14 @@ export function BulkEditPanel() {
   async function applyAll() {
     const { patch, count } = buildAllPatch();
     if (count === 0) return toast.error("Enter at least one value first.");
-    if (!confirm(`Apply ${count} field(s) to all ${ids.length} selected node(s)?`)) return;
+    if (
+      !(await confirmDialog({
+        title: "Bulk edit",
+        message: `Apply ${count} field(s) to all ${ids.length} selected node(s)?`,
+        confirmLabel: "Apply all",
+      }))
+    )
+      return;
     setBusy(true);
     try {
       const n = await t.bulkApply(ids, patch);

@@ -1,10 +1,18 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LayoutGrid, LogOut, UserRound } from "lucide-react";
 import { Brand } from "@/components/Brand";
 import { AboutModal } from "@/components/AboutModal";
+import { ShortcutsModal } from "@/components/ShortcutsModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/store/auth";
+
+function isEditableTarget(el: EventTarget | null): boolean {
+  const node = el as HTMLElement | null;
+  if (!node) return false;
+  const tag = node.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || node.isContentEditable;
+}
 
 /** Chrome for the authenticated area: top bar + content slot. */
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -12,6 +20,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const profile = useAuth((s) => s.profile);
   const signOut = useAuth((s) => s.signOut);
   const [about, setAbout] = useState(false);
+  const [shortcuts, setShortcuts] = useState(false);
+
+  // "?" anywhere in the app (outside a field) opens the shortcuts help.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "?" && !isEditableTarget(e.target)) {
+        e.preventDefault();
+        setShortcuts((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <div className="flex min-h-full flex-col bg-canvas text-ink">
@@ -21,32 +42,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <Brand size={26} />
           </button>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate("/app")}
-              title="Home"
-              className="inline-flex items-center gap-2 rounded border border-line bg-surface px-2.5 py-1.5 text-ink-dim hover:text-ink hover:border-ink-mute"
-            >
+            <button onClick={() => navigate("/app")} title="Home" className="chip bg-surface">
               <LayoutGrid size={16} />
-              <span className="hidden font-mono text-2xs uppercase tracking-widest sm:inline">Home</span>
+              <span className="hidden sm:inline">Home</span>
             </button>
             <ThemeToggle />
-            <Link
-              to="/app/profile"
-              className="inline-flex items-center gap-2 rounded border border-line bg-surface px-2.5 py-1.5 text-ink-dim hover:text-ink hover:border-ink-mute"
-              title="Profile"
-            >
+            <Link to="/app/profile" className="chip bg-surface" title="Profile">
               <UserRound size={16} />
-              <span className="hidden font-mono text-2xs uppercase tracking-widest sm:inline">
-                {profile?.full_name || "Profile"}
-              </span>
+              <span className="hidden sm:inline">{profile?.full_name || "Profile"}</span>
             </Link>
             <button
               onClick={async () => {
                 await signOut();
                 navigate("/");
               }}
-              className="inline-flex items-center gap-2 rounded border border-line bg-surface px-2.5 py-1.5 text-ink-dim hover:text-ink hover:border-ink-mute"
+              className="chip bg-surface"
               title="Sign out"
+              aria-label="Sign out"
             >
               <LogOut size={16} />
             </button>
@@ -55,6 +67,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </header>
       <main className="flex-1">{children}</main>
       <AboutModal open={about} onClose={() => setAbout(false)} />
+      <ShortcutsModal open={shortcuts} onClose={() => setShortcuts(false)} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   addCategory, renameCategory, deleteCategory, CATEGORY_RE, PROTECTED_CATEGORIES,
 } from "@/lib/api/categories";
 import { categoryColor } from "@/lib/domain/color";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 
 export function CategoryManager({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -63,7 +64,15 @@ export function CategoryManager({ open, onClose }: { open: boolean; onClose: () 
   }
 
   async function onDelete(name: string) {
-    if (!confirm(`Delete "${name}"? Its nodes will move to "general".`)) return;
+    if (
+      !(await confirmDialog({
+        title: "Delete category",
+        message: `Delete "${name}"? Its nodes will move to "general".`,
+        confirmLabel: "Delete",
+        danger: true,
+      }))
+    )
+      return;
     setBusy(true);
     try {
       await deleteCategory(projectId!, name);

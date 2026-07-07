@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Check, Sparkles } from "lucide-react";
-import { Brand } from "@/components/Brand";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { PublicHeader, PublicFooter } from "@/components/PublicHeader";
 import { PLANS, COMPARISON, fmtLimit, type Plan, type PlanLimits } from "@/lib/plans";
 
 function PlanCta({ plan }: { plan: Plan }) {
@@ -25,16 +24,7 @@ function comparisonCell(plan: Plan, key: keyof PlanLimits, suffix?: string): str
 export function Pricing() {
   return (
     <div className="min-h-full bg-canvas bg-engineering text-ink">
-      <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link to="/"><Brand size={28} /></Link>
-          <div className="flex items-center gap-2">
-            <Link to="/about" className="hidden px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink sm:inline-block">About</Link>
-            <ThemeToggle />
-            <Link to="/signin" className="rounded border border-line px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">Sign in</Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="mx-auto max-w-6xl space-y-10 px-4 py-12">
         <Link to="/" className="inline-flex items-center gap-1 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
@@ -42,12 +32,12 @@ export function Pricing() {
         </Link>
 
         <div className="text-center">
-          <h1 className="font-brand text-3xl tracking-wide sm:text-4xl">Plans &amp; pricing</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-ink-dim">
+          <h1 className="rise-in font-brand text-3xl tracking-wide sm:text-4xl">Plans &amp; pricing</h1>
+          <p className="rise-in rise-in-1 mx-auto mt-3 max-w-2xl text-ink-dim">
             Simple tiers that scale with the size of your work breakdown, your team, and your project
             portfolio. Start free and grow into it.
           </p>
-          <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-4 py-1.5 font-mono text-2xs uppercase tracking-widest text-brand-blue-light">
+          <p className="rise-in rise-in-2 mt-4 inline-flex items-center gap-2 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-4 py-1.5 font-mono text-2xs uppercase tracking-widest text-brand-blue-light">
             <Sparkles size={13} /> Free during the beta · prices are provisional
           </p>
         </div>
@@ -112,11 +102,9 @@ export function Pricing() {
         <p className="text-center text-2xs text-ink-mute">
           Need something specific? <a href="mailto:hello@cascade-epc.com" className="text-brand-blue hover:underline">hello@cascade-epc.com</a>
         </p>
-
-        <footer className="border-t border-line pt-6 text-center font-mono text-2xs uppercase tracking-widest text-ink-mute">
-          © {new Date().getFullYear()} CASCADE-EPC · Plan it. Track it. CASCADE it.
-        </footer>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

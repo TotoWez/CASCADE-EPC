@@ -101,6 +101,13 @@ export const STATUS_DOT_CLASS: Record<DisplayStatus, string> = {
   blocked: "bg-status-blocked",
 };
 
+/** Literal Tailwind text classes per priority flag (P1 red / P2 orange / P3 gray). */
+export const PRIORITY_FLAG_CLASS: Record<Priority, string> = {
+  1: "text-priority-p1",
+  2: "text-priority-p2",
+  3: "text-priority-p3",
+};
+
 export const QA_GATE_LABEL: Record<QaGate, string> = {
   na: "N/A",
   open: "Open",

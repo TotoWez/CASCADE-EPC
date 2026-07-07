@@ -143,8 +143,8 @@ export function NodeCard(props: NodeCardProps) {
           <button
             onDoubleClick={() => props.canEdit && setEditing(true)}
             onClick={(e) => e.stopPropagation()}
-            className={clsx("text-left text-sm font-medium text-ink", props.matched && "bg-brand-blue/20")}
-            title={props.canEdit ? "Double-click to rename" : undefined}
+            className={clsx("max-w-full truncate text-left text-sm font-medium text-ink", props.matched && "bg-brand-blue/20")}
+            title={props.canEdit ? `${node.title} — double-click to rename` : node.title}
           >
             {node.title}
           </button>

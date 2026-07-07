@@ -12,6 +12,7 @@ import {
   saveSnapshot, listSnapshots, deleteSnapshot, deleteAllSnapshots, getSnapshotState, type SnapshotMeta,
 } from "@/lib/api/snapshots";
 import { ProgressChart } from "./ProgressChart";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 
 const shortDate = (s: string) => new Date(s).toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -72,11 +73,11 @@ export function SnapshotsModal({ open, onClose, projectId }: { open: boolean; on
   }
 
   async function onDelete(id: string) {
-    if (!confirm("Delete this snapshot?")) return;
+    if (!(await confirmDialog({ title: "Delete snapshot", message: "Delete this snapshot?", confirmLabel: "Delete", danger: true }))) return;
     try { await deleteSnapshot(id); await reload(); } catch (e) { toast.error(errMessage(e)); }
   }
   async function onClearAll() {
-    if (!confirm("Delete ALL snapshots? This cannot be undone.")) return;
+    if (!(await confirmDialog({ title: "Delete all snapshots", message: "Delete ALL snapshots? This cannot be undone.", confirmLabel: "Delete all", danger: true }))) return;
     try { await deleteAllSnapshots(projectId); await reload(); } catch (e) { toast.error(errMessage(e)); }
   }
 

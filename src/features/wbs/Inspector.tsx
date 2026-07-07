@@ -14,6 +14,7 @@ import {
 } from "@/lib/types";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
+import { confirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast, errMessage } from "@/store/toast";
 import { CategoryManager } from "./CategoryManager";
 import { DependenciesSection } from "./inspector/DependenciesSection";
@@ -101,19 +102,24 @@ export function Inspector() {
       0,
     );
   }
-  function confirmRegression(target: number): boolean {
+  async function confirmRegression(target: number): Promise<boolean> {
     const pm = peerMax();
-    if (pm > target) return confirm(`A linked peer is at ${pm}%. Lower the whole cluster to ${target}%?`);
+    if (pm > target)
+      return confirmDialog({
+        title: "Linked cluster regression",
+        message: `A linked peer is at ${pm}%. Lower the whole cluster to ${target}%?`,
+        confirmLabel: "Lower cluster",
+      });
     return true;
   }
 
-  function changeStatus(ws: WorkStatus) {
+  async function changeStatus(ws: WorkStatus) {
     const target = ws === "done" ? 100 : ws === "not_started" ? 0 : eff <= 0 || eff >= 100 ? 50 : node!.progress;
-    if (!confirmRegression(target)) return;
+    if (!(await confirmRegression(target))) return;
     void t.setStatus(node!.id, ws).catch((e) => toast.error(errMessage(e)));
   }
-  function changeProgress(p: number) {
-    if (!confirmRegression(p)) return;
+  async function changeProgress(p: number) {
+    if (!(await confirmRegression(p))) return;
     void t.setProgress(node!.id, p).catch((e) => toast.error(errMessage(e)));
   }
 
@@ -141,12 +147,13 @@ export function Inspector() {
           {isLeaf ? (
             <>
               <FieldRow label="Work status">
-                <Select value={node.workStatus} disabled={!canEdit} onChange={(e) => changeStatus(e.target.value as WorkStatus)}
+                <Select value={node.workStatus} disabled={!canEdit} onChange={(e) => void changeStatus(e.target.value as WorkStatus)}
                   options={Object.entries(WORK_STATUS_LABEL).map(([v, l]) => ({ value: v, label: l }))} />
               </FieldRow>
               <FieldRow label={`Progress · ${node.progress}%`}>
                 <input type="range" min={0} max={100} value={node.progress} disabled={!canEdit}
-                  onChange={(e) => changeProgress(Number(e.target.value))} className="w-full" style={{ accentColor: progressColor(node.progress) }} />
+                  onChange={(e) => void changeProgress(Number(e.target.value))} className="w-full"
+                  style={{ "--slider-c": progressColor(node.progress), "--slider-fill": `${node.progress}%` } as React.CSSProperties} />
               </FieldRow>
             </>
           ) : (
@@ -161,7 +168,8 @@ export function Inspector() {
           )}
           <FieldRow label={`Volume (weight) · ${node.volume}`}>
             <input type="range" min={1} max={10} value={node.volume} disabled={!canEdit}
-              onChange={(e) => patch({ volume: Number(e.target.value) })} className="w-full" style={{ accentColor: volumeColor(node.volume) }} />
+              onChange={(e) => patch({ volume: Number(e.target.value) })} className="w-full"
+              style={{ "--slider-c": volumeColor(node.volume), "--slider-fill": `${((node.volume - 1) / 9) * 100}%` } as React.CSSProperties} />
           </FieldRow>
         </Section>
 
