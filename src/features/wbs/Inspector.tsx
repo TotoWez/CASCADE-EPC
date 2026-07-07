@@ -54,7 +54,15 @@ const FieldRow = ({ label, children }: { label: string; children: ReactNode }) =
 );
 
 export function Inspector() {
-  const t = useTree();
+  // Narrow subscriptions: re-render only when the selection or node data
+  // changes — not on filters / clipboard / expand state (matters at 5k nodes).
+  const selectedId = useTree((s) => s.selectedId);
+  const nodeSel = useTree((s) => (s.selectedId ? s.nodeMap[s.selectedId] : undefined));
+  const effMap = useTree((s) => s.effMap);
+  const treeIndex = useTree((s) => s.index);
+  const categories = useTree((s) => s.categories);
+  // Zustand actions are stable — reading them off the store avoids subscribing.
+  const t = useTree.getState();
   const role = useProject((s) => s.role);
   const members = useProject((s) => s.members);
   const orgMembers = useProject((s) => s.orgMembers);
@@ -72,7 +80,7 @@ export function Inspector() {
     return [...byId.values()];
   }, [members, orgMembers]);
 
-  const node = t.selectedId ? t.nodeMap[t.selectedId] : undefined;
+  const node = selectedId ? nodeSel : undefined;
 
   if (!node) {
     return (
@@ -83,9 +91,9 @@ export function Inspector() {
     );
   }
 
-  const isLeaf = getChildren(t.index, node.id).length === 0;
-  const eff = t.effMap[node.id] ?? 0;
-  const status = displayStatus(node, t.effMap);
+  const isLeaf = getChildren(treeIndex, node.id).length === 0;
+  const eff = effMap[node.id] ?? 0;
+  const status = displayStatus(node, effMap);
   const canEdit = can(role, "wbs.build") || (can(role, "wbs.editAssigned") && node.assignedUserId === myId);
   const canQa = can(role, "gate.qa");
   const canHse = can(role, "gate.hse");
@@ -95,10 +103,12 @@ export function Inspector() {
     t.patch(node.id, p, activity).catch((e) => toast.error(errMessage(e)));
 
   // Highest progress among linked peers — used for the downward-regression warning.
+  // Reads fresh state at call time (event handlers), no render subscription needed.
   function peerMax(): number {
     if (!node!.clusterId) return -1;
+    const s = useTree.getState();
     return Math.max(
-      ...t.nodes.filter((n) => n.clusterId === node!.clusterId && n.id !== node!.id).map((n) => t.effMap[n.id] ?? 0),
+      ...s.nodes.filter((n) => n.clusterId === node!.clusterId && n.id !== node!.id).map((n) => s.effMap[n.id] ?? 0),
       0,
     );
   }
@@ -235,7 +245,7 @@ export function Inspector() {
             <Select value={node.category} disabled={!canEdit}
               onChange={(e) => { if (e.target.value === "__add__") { setCatOpen(true); return; } patch({ category: e.target.value }, { type: "category", message: `${node.nodeCode} → ${e.target.value}` }); }}
               options={[
-                ...[...new Set([node.category, ...t.categories.map((c) => c.name)])].map((c) => ({ value: c, label: c })),
+                ...[...new Set([node.category, ...categories.map((c) => c.name)])].map((c) => ({ value: c, label: c })),
                 ...(can(role, "category.manage") ? [{ value: "__add__", label: "＋ Add category…" }] : []),
               ]} />
           </FieldRow>

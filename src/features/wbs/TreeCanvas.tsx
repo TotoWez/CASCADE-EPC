@@ -242,7 +242,10 @@ type SortableNodeProps = Omit<Parameters<typeof NodeCard>[0], "onSelect" | "onTo
 };
 
 function SortableNode({ disabled, ...cardProps }: SortableNodeProps) {
-  const t = useTree();
+  // Rendered once per visible node — do NOT subscribe to the store here (at
+  // 5k nodes that's 5k subscriptions firing on every keystroke). All uses
+  // below are actions, which are stable; read them off the store lazily.
+  const t = useTree.getState();
   const node = cardProps.node;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: node.id, disabled });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
