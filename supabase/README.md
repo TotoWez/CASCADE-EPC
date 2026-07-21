@@ -44,6 +44,18 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
 - **Cross-role writes** (role-scoped invites, one-entry bulk edits, snapshots,
   clear-activity) go through SECURITY DEFINER RPCs that re-check `auth.uid()`.
 
+> **Tooling note — SQL call-chain blind spot.** Static analysis that builds a
+> call graph from these migrations (e.g. tree-sitter / graphify) indexes each
+> SQL function *definition* but does **not** resolve SQL→SQL calls inside
+> function bodies or policy predicates. So the security wiring that matters most
+> — RLS policies invoking `can_edit_node`, `can_edit_node` calling
+> `auth_project_role`, the `enforce_gate_authority` trigger keyed on the same
+> helper — is invisible to those tools; they show each function as merely
+> "contained in its migration file". `auth_project_role` is the keystone (~39
+> call sites across `0003`–`0009`), but that fan-in only shows up by reading the
+> SQL, not from an extracted graph. When auditing authorization, grep the
+> migrations directly rather than trusting a generated dependency graph.
+
 ## Free-tier notes
 
 - Project pauses after ~7 days inactivity → the `cascade-keepalive` cron ping

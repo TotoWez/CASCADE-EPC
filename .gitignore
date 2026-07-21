@@ -45,3 +45,6 @@ supabase/.temp
 
 # office temp lock files
 ~$*.docx
+
+# graphify knowledge-graph output (generated locally)
+graphify-out/
