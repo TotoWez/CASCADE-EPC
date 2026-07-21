@@ -46,5 +46,8 @@ supabase/.temp
 # office temp lock files
 ~$*.docx
 
-# graphify knowledge-graph output (generated locally)
-graphify-out/
+# graphify — track the outputs (graph.html/json, GRAPH_REPORT.md, manifest);
+# ignore machine-specific internals (absolute interpreter/root paths) and caches
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/cache/
