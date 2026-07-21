@@ -14,3 +14,8 @@
 *.woff2 binary
 *.docx binary
 *.pdf binary
+
+# Generated graphify outputs — tracked, but suppress blob diffs (they churn
+# on every rebuild). Still versioned; `git diff` just won't print their contents.
+graphify-out/graph.html -diff
+graphify-out/graph.json -diff
