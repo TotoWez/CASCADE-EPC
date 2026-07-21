@@ -8,7 +8,7 @@ import { can } from "@/lib/permissions";
 import { listOrgMembers, type OrgMemberRef } from "@/lib/api/members";
 import { exportProjectData, downloadJson, importProjectData } from "@/lib/api/transfer";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import type { Project } from "@/lib/types";
 
 function PartyCard({ label, name, logo }: { label: string; name: string; logo: string | null }) {
@@ -60,7 +60,7 @@ export function ProjectControl() {
       await tree.load(project.id);
       toast.success(`Imported ${created} node(s).`);
     } catch (e) {
-      toast.error(`Import failed: ${errMessage(e)}`);
+      toast.fail(e, "Import failed");
     } finally {
       setImporting(false);
     }

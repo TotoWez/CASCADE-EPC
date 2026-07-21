@@ -11,7 +11,7 @@ import { relativeTime } from "@/lib/time";
 import { ROLE_LABEL, type Role } from "@/lib/types";
 import { listActivity, clearActivity, type ActivityRow } from "@/lib/api/activity";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 const TYPES = [
   "status", "progress", "gate", "bulk", "create", "delete", "copy", "paste", "rename",
@@ -30,7 +30,7 @@ export function ActivityModal({ open, onClose, projectId }: { open: boolean; onC
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    listActivity(projectId).then(setRows).catch((e) => toast.error(errMessage(e))).finally(() => setLoading(false));
+    listActivity(projectId).then(setRows).catch((e) => toast.fail(e)).finally(() => setLoading(false));
   }, [projectId]);
 
   const filtered = useMemo(() => {
@@ -64,7 +64,7 @@ export function ActivityModal({ open, onClose, projectId }: { open: boolean; onC
       await clearActivity(projectId);
       setRows([]);
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     }
   }
 

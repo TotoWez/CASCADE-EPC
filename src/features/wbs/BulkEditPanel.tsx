@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 type FieldKey = "workStatus" | "progress" | "priority" | "category" | "assigneeName" | "startDate" | "dueDate";
 
@@ -85,7 +85,7 @@ export function BulkEditPanel() {
       toast.success(`Updated ${n} node(s).`);
       setPending(null);
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }
@@ -123,7 +123,7 @@ export function BulkEditPanel() {
       toast.success(`Updated ${n} node(s).`);
       setVals({});
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }

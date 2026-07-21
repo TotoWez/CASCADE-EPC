@@ -10,7 +10,7 @@ import { ProjectControl } from "@/features/projects/ProjectControl";
 import { TeamPanel } from "@/features/projects/TeamPanel";
 import { WbsView } from "@/features/wbs/WbsView";
 import { useRealtime } from "@/features/wbs/useRealtime";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 type Tab = "wbs" | "control" | "team";
 
@@ -31,7 +31,7 @@ export function ProjectWorkspace() {
   useEffect(() => {
     if (id) {
       void load(id);
-      void loadTree(id).catch((e) => toast.error(errMessage(e)));
+      void loadTree(id).catch((e) => toast.fail(e));
     }
     return () => clear();
   }, [id, load, clear, loadTree]);

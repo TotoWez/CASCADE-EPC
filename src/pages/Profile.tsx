@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { useAuth } from "@/store/auth";
 import { updateProfile, uploadAvatar } from "@/lib/api/profile";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 export function Profile() {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ export function Profile() {
       await refresh();
       toast.success("Profile saved.");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }
@@ -52,7 +52,7 @@ export function Profile() {
       await refresh();
       toast.success("Photo updated.");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setUploading(false);
     }

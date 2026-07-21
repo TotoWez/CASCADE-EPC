@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { acceptInvitation, sendMagicLink } from "@/lib/api/auth";
 import { useAuth } from "@/store/auth";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 const PENDING_KEY = "cascade.pendingInvite";
 
@@ -35,7 +35,7 @@ export function Join() {
       toast.success("Invitation accepted.");
       navigate(projectId ? `/app/projects/${projectId}` : "/app");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }
@@ -63,7 +63,7 @@ export function Join() {
       await sendMagicLink(email, `/join?code=${encodeURIComponent(code.trim())}`);
       setLinkSent(true);
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

@@ -10,7 +10,7 @@ import { useAuth } from "@/store/auth";
 import { can } from "@/lib/permissions";
 import { attachmentKind, opensInTab, sourceColor, groupBySource, type AttachmentKind } from "@/lib/domain/notes";
 import { attachmentUrl } from "@/lib/api/notes";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { Note, NoteAttachment, WbsNode } from "@/lib/types";
@@ -32,7 +32,7 @@ async function openAttachment(att: NoteAttachment) {
       a.click();
     }
   } catch (e) {
-    toast.error(errMessage(e));
+    toast.fail(e);
   }
 }
 
@@ -72,7 +72,7 @@ export function NotesSection({ node }: { node: WbsNode; canEdit: boolean }) {
       setText("");
       setSrc("");
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     }
   }
 
@@ -98,7 +98,7 @@ export function NotesSection({ node }: { node: WbsNode; canEdit: boolean }) {
                     className="mb-1 h-7 text-sm"
                     onBlur={(e) => {
                       const v = e.target.value.trim();
-                      if (v && v !== n.text) t.updateNote(node.id, n.id, { text: v }).catch((err) => toast.error(errMessage(err)));
+                      if (v && v !== n.text) t.updateNote(node.id, n.id, { text: v }).catch((err) => toast.fail(err));
                       setEditId(null);
                     }}
                     onKeyDown={(e) => {
@@ -114,14 +114,14 @@ export function NotesSection({ node }: { node: WbsNode; canEdit: boolean }) {
                 {n.attachments.length > 0 && (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {n.attachments.map((a) => (
-                      <AttachmentChip key={a.id} att={a} onRemove={canEditText(n) ? () => t.removeAttachment(node.id, n.id, a).catch((e) => toast.error(errMessage(e))) : undefined} />
+                      <AttachmentChip key={a.id} att={a} onRemove={canEditText(n) ? () => t.removeAttachment(node.id, n.id, a).catch((e) => toast.fail(e)) : undefined} />
                     ))}
                   </div>
                 )}
 
                 <div className="mt-1 flex items-center gap-2">
                   {canResolve(n) && (
-                    <button onClick={() => t.updateNote(node.id, n.id, { checked: !n.checked }).catch((e) => toast.error(errMessage(e)))} className={clsx("inline-flex items-center gap-0.5 text-2xs", n.checked ? "text-ink-mute hover:text-ink" : "text-brand-green hover:opacity-80")}>
+                    <button onClick={() => t.updateNote(node.id, n.id, { checked: !n.checked }).catch((e) => toast.fail(e))} className={clsx("inline-flex items-center gap-0.5 text-2xs", n.checked ? "text-ink-mute hover:text-ink" : "text-brand-green hover:opacity-80")}>
                       {n.checked ? <><RotateCcw size={11} />reopen</> : <><Check size={11} />resolve</>}
                     </button>
                   )}
@@ -131,10 +131,10 @@ export function NotesSection({ node }: { node: WbsNode; canEdit: boolean }) {
                   {canNote && (
                     <>
                       <button onClick={() => fileRefs.current[n.id]?.click()} className="inline-flex items-center gap-0.5 text-2xs text-ink-mute hover:text-ink"><Paperclip size={11} />attach</button>
-                      <input ref={(el) => { fileRefs.current[n.id] = el; }} type="file" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) t.addAttachment(node.id, n.id, f).catch((err) => toast.error(errMessage(err))); e.currentTarget.value = ""; }} />
+                      <input ref={(el) => { fileRefs.current[n.id] = el; }} type="file" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) t.addAttachment(node.id, n.id, f).catch((err) => toast.fail(err)); e.currentTarget.value = ""; }} />
                     </>
                   )}
-                  {canDelete(n) && <button onClick={() => t.deleteNote(node.id, n.id).catch((e) => toast.error(errMessage(e)))} className="inline-flex items-center gap-0.5 text-2xs text-ink-mute hover:text-status-blocked"><Trash2 size={11} />delete</button>}
+                  {canDelete(n) && <button onClick={() => t.deleteNote(node.id, n.id).catch((e) => toast.fail(e))} className="inline-flex items-center gap-0.5 text-2xs text-ink-mute hover:text-status-blocked"><Trash2 size={11} />delete</button>}
                 </div>
               </li>
             ))}

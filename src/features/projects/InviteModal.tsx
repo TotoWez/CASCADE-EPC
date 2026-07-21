@@ -8,7 +8,7 @@ import { Select } from "@/components/ui/Select";
 import { assignableRoles } from "@/lib/permissions";
 import { ROLE_LABEL, type ProjectRole, type Role } from "@/lib/types";
 import { createInvitation, assignRole, listOrgMembers, type OrgMemberRef } from "@/lib/api/members";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 export function InviteModal({
   open,
@@ -61,7 +61,7 @@ export function InviteModal({
       setCode(c);
       onChanged();
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }
@@ -76,7 +76,7 @@ export function InviteModal({
       onChanged();
       onClose();
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

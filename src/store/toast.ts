@@ -26,15 +26,18 @@ export const useToasts = create<ToastState>((set, get) => ({
   dismiss: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));
 
-/** Convenience helpers for non-component call sites. */
-export const toast = {
-  success: (m: string) => useToasts.getState().push("success", m),
-  error: (m: string) => useToasts.getState().push("error", m),
-  info: (m: string) => useToasts.getState().push("info", m),
-};
-
 /** Normalise an unknown thrown value into a user-facing message. */
 export function errMessage(e: unknown): string {
   if (e && typeof e === "object" && "message" in e) return String((e as { message: unknown }).message);
   return String(e);
 }
+
+/** Convenience helpers for non-component call sites. */
+export const toast = {
+  success: (m: string) => useToasts.getState().push("success", m),
+  error: (m: string) => useToasts.getState().push("error", m),
+  info: (m: string) => useToasts.getState().push("info", m),
+  /** Show a thrown value as an error toast, optionally prefixed (e.g. "Import failed"). */
+  fail: (e: unknown, prefix?: string) =>
+    useToasts.getState().push("error", prefix ? `${prefix}: ${errMessage(e)}` : errMessage(e)),
+};

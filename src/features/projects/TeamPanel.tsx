@@ -8,7 +8,7 @@ import { ROLE_LABEL } from "@/lib/types";
 import { listInvitations, deleteInvitation, removeMember, type Invitation } from "@/lib/api/members";
 import { useAuth } from "@/store/auth";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 export function TeamPanel() {
   const project = useProject((s) => s.project)!;
@@ -49,7 +49,7 @@ export function TeamPanel() {
       await reloadMembers();
       toast.success("Member removed.");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     }
   }
 
@@ -58,7 +58,7 @@ export function TeamPanel() {
       await deleteInvitation(id);
       setInvites((prev) => prev.filter((i) => i.id !== id));
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     }
   }
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, X, ArrowRight } from "lucide-react";
 import { useTree } from "@/store/tree";
 import { validDependencyTargets } from "@/lib/domain/cycles";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import type { WbsNode } from "@/lib/types";
 import { NodePickerModal } from "./NodePickerModal";
 
@@ -36,7 +36,7 @@ export function DependenciesSection({ node, canEdit }: { node: WbsNode; canEdit:
                   </button>
                   <span className={done ? "text-2xs text-brand-green" : "text-2xs text-status-blocked"}>{done ? "done" : "pending"}</span>
                   {canEdit && (
-                    <button onClick={() => void t.removeDependency(node.id, id).catch((e) => toast.error(errMessage(e)))} className="text-ink-mute hover:text-status-blocked">
+                    <button onClick={() => void t.removeDependency(node.id, id).catch((e) => toast.fail(e))} className="text-ink-mute hover:text-status-blocked">
                       <X size={13} />
                     </button>
                   )}
@@ -70,7 +70,7 @@ export function DependenciesSection({ node, canEdit }: { node: WbsNode; canEdit:
           onClose={() => setPicking(false)}
           title="Add dependency"
           candidates={validDependencyTargets(t.nodeMap, node.id)}
-          onPick={(id) => void t.addDependency(node.id, id).catch((e) => toast.error(errMessage(e)))}
+          onPick={(id) => void t.addDependency(node.id, id).catch((e) => toast.fail(e))}
         />
       )}
     </div>

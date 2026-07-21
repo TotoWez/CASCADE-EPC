@@ -5,7 +5,7 @@ import { AuthCard } from "@/components/AuthCard";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { requestPasswordReset } from "@/lib/api/auth";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 export function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -19,7 +19,7 @@ export function ForgotPassword() {
       await requestPasswordReset(email);
       setSent(true);
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

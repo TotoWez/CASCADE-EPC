@@ -13,7 +13,7 @@ import {
 } from "@/lib/api/snapshots";
 import { ProgressChart } from "./ProgressChart";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 const shortDate = (s: string) => new Date(s).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 
@@ -35,7 +35,7 @@ export function SnapshotsModal({ open, onClose, projectId }: { open: boolean; on
     setSnaps(await listSnapshots(projectId));
   }
   useEffect(() => {
-    reload().catch((e) => toast.error(errMessage(e))).finally(() => setLoading(false));
+    reload().catch((e) => toast.fail(e)).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
@@ -55,7 +55,7 @@ export function SnapshotsModal({ open, onClose, projectId }: { open: boolean; on
       await reload();
       toast.success("Snapshot saved.");
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }
@@ -68,17 +68,17 @@ export function SnapshotsModal({ open, onClose, projectId }: { open: boolean; on
       const [oa, ob] = await Promise.all([getSnapshotState(two[0]!.id), getSnapshotState(two[1]!.id)]);
       setDiff({ older: two[0]!, newer: two[1]!, data: diffSnapshots(oa, ob) });
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     }
   }
 
   async function onDelete(id: string) {
     if (!(await confirmDialog({ title: "Delete snapshot", message: "Delete this snapshot?", confirmLabel: "Delete", danger: true }))) return;
-    try { await deleteSnapshot(id); await reload(); } catch (e) { toast.error(errMessage(e)); }
+    try { await deleteSnapshot(id); await reload(); } catch (e) { toast.fail(e); }
   }
   async function onClearAll() {
     if (!(await confirmDialog({ title: "Delete all snapshots", message: "Delete ALL snapshots? This cannot be undone.", confirmLabel: "Delete all", danger: true }))) return;
-    try { await deleteAllSnapshots(projectId); await reload(); } catch (e) { toast.error(errMessage(e)); }
+    try { await deleteAllSnapshots(projectId); await reload(); } catch (e) { toast.fail(e); }
   }
 
   return (

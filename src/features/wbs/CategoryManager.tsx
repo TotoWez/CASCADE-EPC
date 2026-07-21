@@ -9,7 +9,7 @@ import {
 } from "@/lib/api/categories";
 import { categoryColor } from "@/lib/domain/color";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 export function CategoryManager({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { projectId, nodes, categories, setNodesLocal, reloadCategories } = useTree();
@@ -40,7 +40,7 @@ export function CategoryManager({ open, onClose }: { open: boolean; onClose: () 
       await reloadCategories();
       setNewName("");
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }
@@ -57,7 +57,7 @@ export function CategoryManager({ open, onClose }: { open: boolean; onClose: () 
       await reloadCategories();
       setEditing(null);
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }
@@ -79,7 +79,7 @@ export function CategoryManager({ open, onClose }: { open: boolean; onClose: () 
       setNodesLocal(nodes.map((n) => (n.category === name ? { ...n, category: "general" } : n)));
       await reloadCategories();
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }

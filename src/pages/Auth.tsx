@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { signIn, signUp } from "@/lib/api/auth";
 import { useAuth } from "@/store/auth";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import { env } from "@/lib/env";
 
 export function Auth({ mode }: { mode: "signin" | "signup" }) {
@@ -56,7 +56,7 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
         // The effect routes to /app when the store becomes authed.
       }
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

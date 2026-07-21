@@ -15,7 +15,7 @@ import {
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import { CategoryManager } from "./CategoryManager";
 import { DependenciesSection } from "./inspector/DependenciesSection";
 import { LinkedSection } from "./inspector/LinkedSection";
@@ -100,7 +100,7 @@ export function Inspector() {
   const memberName = (id?: string | null) => (id ? members.find((m) => m.userId === id)?.name ?? "someone" : "");
 
   const patch = (p: Parameters<typeof t.patch>[1], activity?: Parameters<typeof t.patch>[2]) =>
-    t.patch(node.id, p, activity).catch((e) => toast.error(errMessage(e)));
+    t.patch(node.id, p, activity).catch((e) => toast.fail(e));
 
   // Highest progress among linked peers — used for the downward-regression warning.
   // Reads fresh state at call time (event handlers), no render subscription needed.
@@ -126,11 +126,11 @@ export function Inspector() {
   async function changeStatus(ws: WorkStatus) {
     const target = ws === "done" ? 100 : ws === "not_started" ? 0 : eff <= 0 || eff >= 100 ? 50 : node!.progress;
     if (!(await confirmRegression(target))) return;
-    void t.setStatus(node!.id, ws).catch((e) => toast.error(errMessage(e)));
+    void t.setStatus(node!.id, ws).catch((e) => toast.fail(e));
   }
   async function changeProgress(p: number) {
     if (!(await confirmRegression(p))) return;
-    void t.setProgress(node!.id, p).catch((e) => toast.error(errMessage(e)));
+    void t.setProgress(node!.id, p).catch((e) => toast.fail(e));
   }
 
   return (
@@ -191,7 +191,7 @@ export function Inspector() {
             <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">QAQC / HSE gates</p>
             <FieldRow label="QAQC gate">
               {canQa ? (
-                <Select value={node.qaGate} onChange={(e) => t.setQaGate(node.id, e.target.value as QaGate, myId).catch((err) => toast.error(errMessage(err)))}
+                <Select value={node.qaGate} onChange={(e) => t.setQaGate(node.id, e.target.value as QaGate, myId).catch((err) => toast.fail(err))}
                   options={Object.entries(QA_GATE_LABEL).map(([v, l]) => ({ value: v, label: l }))} />
               ) : (
                 <div className="flex items-center gap-1.5 rounded border border-line bg-canvas px-3 py-2 text-sm text-ink"><BadgeCheck size={14} className="text-brand-orange" />{QA_GATE_LABEL[node.qaGate]}</div>
@@ -200,7 +200,7 @@ export function Inspector() {
             </FieldRow>
             <FieldRow label="HSE gate">
               {canHse ? (
-                <Select value={node.hseGate} onChange={(e) => t.setHseGate(node.id, e.target.value as HseGate, myId).catch((err) => toast.error(errMessage(err)))}
+                <Select value={node.hseGate} onChange={(e) => t.setHseGate(node.id, e.target.value as HseGate, myId).catch((err) => toast.fail(err))}
                   options={Object.entries(HSE_GATE_LABEL).map(([v, l]) => ({ value: v, label: l }))} />
               ) : (
                 <div className="flex items-center gap-1.5 rounded border border-line bg-canvas px-3 py-2 text-sm text-ink">{node.hseGate === "complied" ? <ShieldCheck size={14} className="text-brand-green" /> : <ShieldAlert size={14} className="text-status-blocked" />}{HSE_GATE_LABEL[node.hseGate]}</div>

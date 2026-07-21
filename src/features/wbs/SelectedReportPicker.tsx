@@ -6,7 +6,7 @@ import { useTree } from "@/store/tree";
 import { useProject } from "@/store/project";
 import { getChildren } from "@/lib/domain/tree";
 import { displayStatus } from "@/lib/domain/status";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 export function SelectedReportPicker({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTree();
@@ -42,7 +42,7 @@ export function SelectedReportPicker({ open, onClose }: { open: boolean; onClose
       await selectedReport(project, t.nodes, [...sel]);
       onClose();
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }

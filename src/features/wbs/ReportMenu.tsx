@@ -3,7 +3,7 @@ import { FileText, ChevronDown, Loader2 } from "lucide-react";
 import { useTree } from "@/store/tree";
 import { useProject } from "@/store/project";
 import { can } from "@/lib/permissions";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import { SelectedReportPicker } from "./SelectedReportPicker";
 import type { GateScope } from "@/lib/pdf/gatesReport";
 
@@ -48,7 +48,7 @@ export function ReportMenu() {
     try {
       await fn();
     } catch (e) {
-      toast.error(errMessage(e));
+      toast.fail(e);
     } finally {
       setBusy(false);
     }

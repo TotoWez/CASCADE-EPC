@@ -8,7 +8,7 @@ import { ProjectForm } from "@/features/projects/ProjectForm";
 import { listProjects } from "@/lib/api/projects";
 import { listOrgMembers, type OrgMemberRef } from "@/lib/api/members";
 import { useAuth } from "@/store/auth";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import type { Project } from "@/lib/types";
 
 export function ProjectsList() {
@@ -24,7 +24,7 @@ export function ProjectsList() {
   useEffect(() => {
     listProjects()
       .then(setProjects)
-      .catch((e) => toast.error(errMessage(e)))
+      .catch((e) => toast.fail(e))
       .finally(() => setLoading(false));
   }, []);
 

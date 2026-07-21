@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { bootstrapOrg } from "@/lib/api/auth";
 import { useAuth } from "@/store/auth";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 /** Shown to a confirmed user who has no organization yet. */
 export function Onboarding() {
@@ -24,7 +24,7 @@ export function Onboarding() {
       toast.success("Organization created — you are its Admin.");
       navigate("/app");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

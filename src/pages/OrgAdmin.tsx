@@ -7,7 +7,7 @@ import { Input, Field } from "@/components/ui/Input";
 import { useAuth } from "@/store/auth";
 import { getOrg, updateOrg, uploadBranding, usageStats, type Org, type UsageStats } from "@/lib/api/org";
 import { PLANS, type Plan } from "@/lib/plans";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 function planFor(tier: string | undefined): Plan {
   return PLANS.find((p) => p.id === (tier ?? "free")) ?? PLANS[0]!;
@@ -33,7 +33,7 @@ export function OrgAdmin() {
         setUsage(u);
         setName(o?.name ?? "");
       })
-      .catch((e) => toast.error(errMessage(e)))
+      .catch((e) => toast.fail(e))
       .finally(() => setLoading(false));
   }, [adminOrg]);
 
@@ -47,7 +47,7 @@ export function OrgAdmin() {
       await refresh();
       toast.success("Organization updated.");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }
@@ -62,7 +62,7 @@ export function OrgAdmin() {
       setOrg({ ...org, logoUrl: url });
       toast.success("Logo updated.");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

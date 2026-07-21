@@ -15,7 +15,7 @@ import { displayStatus, dueState } from "@/lib/domain/status";
 import { isMatch, matchesSearch, filtersActive } from "@/lib/domain/filter";
 import { siblingAccent } from "@/lib/domain/color";
 import { confirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import { NodeCard } from "./NodeCard";
 import { FilterBar } from "./FilterBar";
 import { CategoryManager } from "./CategoryManager";
@@ -72,7 +72,7 @@ export function TreeCanvas() {
     const from = sibs.indexOf(active.id as string);
     const to = sibs.indexOf(over.id as string);
     if (from < 0 || to < 0) return;
-    void t.reorder(a.parentId, arrayMove(sibs, from, to)).catch((err) => toast.error(errMessage(err)));
+    void t.reorder(a.parentId, arrayMove(sibs, from, to)).catch((err) => toast.fail(err));
   }
 
   function canEditNode(n: WbsNode): boolean {
@@ -84,7 +84,7 @@ export function TreeCanvas() {
     try {
       await t.addChild(null, { title: "New Root", category: "root" });
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     }
   }
 
@@ -256,7 +256,7 @@ function SortableNode({ disabled, ...cardProps }: SortableNodeProps) {
         {...cardProps}
         onSelect={(e) => t.select(node.id, e.ctrlKey || e.metaKey)}
         onToggle={() => t.toggleExpand(node.id)}
-        onAddChild={() => void t.addChild(node.id).catch((e) => toast.error(errMessage(e)))}
+        onAddChild={() => void t.addChild(node.id).catch((e) => toast.fail(e))}
         onDelete={() => {
           void confirmDialog({
             title: "Delete node",
@@ -264,10 +264,10 @@ function SortableNode({ disabled, ...cardProps }: SortableNodeProps) {
             confirmLabel: "Delete",
             danger: true,
           }).then((ok) => {
-            if (ok) void t.remove(node.id).catch((e) => toast.error(errMessage(e)));
+            if (ok) void t.remove(node.id).catch((e) => toast.fail(e));
           });
         }}
-        onRename={(title) => void t.rename(node.id, title).catch((e) => toast.error(errMessage(e)))}
+        onRename={(title) => void t.rename(node.id, title).catch((e) => toast.fail(e))}
         dragHandle={{ attributes, listeners }}
       />
     </div>

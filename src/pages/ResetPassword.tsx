@@ -4,7 +4,7 @@ import { AuthCard } from "@/components/AuthCard";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { updatePassword } from "@/lib/api/auth";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 /**
  * Landing page for the password-recovery email link. Supabase establishes a
@@ -29,7 +29,7 @@ export function ResetPassword() {
       toast.success("Password updated.");
       navigate("/app");
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }

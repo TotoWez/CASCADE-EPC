@@ -8,7 +8,7 @@ import { createProject, updateProject, type ProjectInput } from "@/lib/api/proje
 import { uploadBranding } from "@/lib/api/org";
 import type { OrgMemberRef } from "@/lib/api/members";
 import { DEFAULT_PROJECT_SETTINGS, type Project } from "@/lib/types";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 
 type PartyKey = "client" | "consultant" | "contractor" | "subContractor";
 const PARTIES: { key: PartyKey; label: string; logo: keyof Project }[] = [
@@ -68,7 +68,7 @@ export function ProjectForm({
       onSaved(saved);
       onClose();
     } catch (err) {
-      toast.error(errMessage(err));
+      toast.fail(err);
     } finally {
       setBusy(false);
     }
@@ -181,7 +181,7 @@ function LogoUploader({ orgId, label, url, onUploaded }: { orgId: string; label:
           try {
             onUploaded(await uploadBranding(orgId, f, label));
           } catch (err) {
-            toast.error(errMessage(err));
+            toast.fail(err);
           } finally {
             setBusy(false);
           }

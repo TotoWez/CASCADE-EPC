@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link2, Unlink, Plus } from "lucide-react";
 import { useTree } from "@/store/tree";
 import { validLinkTargets } from "@/lib/domain/cycles";
-import { toast, errMessage } from "@/store/toast";
+import { toast } from "@/store/toast";
 import type { WbsNode } from "@/lib/types";
 import { NodePickerModal } from "./NodePickerModal";
 
@@ -39,7 +39,7 @@ export function LinkedSection({ node, canEdit }: { node: WbsNode; canEdit: boole
             <Plus size={12} /> Link node
           </button>
           {node.clusterId && (
-            <button onClick={() => void t.unlink(node.id).catch((e) => toast.error(errMessage(e)))} className="inline-flex items-center gap-1 rounded border border-line px-2 py-1 text-2xs text-status-blocked hover:opacity-80">
+            <button onClick={() => void t.unlink(node.id).catch((e) => toast.fail(e))} className="inline-flex items-center gap-1 rounded border border-line px-2 py-1 text-2xs text-status-blocked hover:opacity-80">
               <Unlink size={12} /> Unlink this
             </button>
           )}
@@ -52,7 +52,7 @@ export function LinkedSection({ node, canEdit }: { node: WbsNode; canEdit: boole
           onClose={() => setPicking(false)}
           title="Link to node"
           candidates={validLinkTargets(t.nodes, node)}
-          onPick={(id) => void t.link(node.id, id).catch((e) => toast.error(errMessage(e)))}
+          onPick={(id) => void t.link(node.id, id).catch((e) => toast.fail(e))}
         />
       )}
     </div>
