@@ -55,6 +55,14 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
 > call sites across `0003`–`0009`), but that fan-in only shows up by reading the
 > SQL, not from an extracted graph. When auditing authorization, grep the
 > migrations directly rather than trusting a generated dependency graph.
+>
+> Note that this very section, once extracted, makes graphify reconstruct the
+> call chain (`RLS → can_edit_node → auth_project_role`) from the *prose* — but
+> as a parallel set of README-sourced nodes, disconnected from the real
+> migration nodes (graphify keys node IDs on `{source_path}_{symbol}`, so the
+> doc's `auth_project_role` and the SQL's `auth_project_role` never merge). Treat
+> that doc-mirror as a **reading aid, not a substitute for AST call resolution**:
+> a query against the actual SQL function nodes still returns no callers.
 
 ## Free-tier notes
 
