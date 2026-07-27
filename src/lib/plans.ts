@@ -1,21 +1,21 @@
 /**
- * Provisional subscription plans — shown for planning only. CASCADE-EPC is free
- * during the beta; prices here are placeholders for a future billing rollout.
+ * Subscription plans — the single source of truth for the pricing page, the
+ * org usage meters, and (mirrored in SQL) the database limit triggers.
  *
- * Plans scale on the dimensions that actually cost us money / signal team size:
- * number of projects, WBS size (nodes per project), org seats, attachment
- * storage, snapshot history, plus a few gated capabilities. Inspired by the
- * tiering of ClickUp / Monday / Asana, adapted to EPC execution tracking.
+ * Three tiers, priced flat per workspace in AED (seats are a limit, not a
+ * per-seat multiplier). Keep `limits` in sync with `plan_limits()` in
+ * supabase/migrations/0012_platform_and_billing.sql.
  */
 
-export type PlanId = "free" | "team" | "business" | "enterprise";
+export type PlanId = "free" | "pro" | "pro_max";
 
 export interface PlanLimits {
-  /** null = unlimited */
+  /** null = unlimited (unused today, kept for headroom). */
   projects: number | null;
   nodesPerProject: number | null;
   members: number | null;
-  storageGb: number | null;
+  /** Attachment storage cap in MB (Free = 300 MB, so MB not GB). */
+  storageMb: number | null;
   snapshots: number | null;
 }
 
@@ -23,12 +23,12 @@ export interface Plan {
   id: PlanId;
   name: string;
   tagline: string;
-  /** Provisional price label, e.g. "$0" or "$19". */
+  /** Price label, e.g. "0 AED" or "60 AED". */
   price: string;
-  /** Sub-label under the price, e.g. "per editor / month". */
+  /** Sub-label under the price, e.g. "forever" or "/ month". */
   priceSub: string;
   cta: string;
-  /** Where the CTA points. */
+  /** Where the CTA points for a signed-out visitor. */
   ctaTo: string;
   highlighted?: boolean;
   limits: PlanLimits;
@@ -41,11 +41,11 @@ export const PLANS: Plan[] = [
     id: "free",
     name: "Free",
     tagline: "For trials and small crews getting a project off the ground.",
-    price: "$0",
+    price: "0 AED",
     priceSub: "forever",
     cta: "Start free",
     ctaTo: "/signup",
-    limits: { projects: 3, nodesPerProject: 500, members: 5, storageGb: 1, snapshots: 10 },
+    limits: { projects: 1, nodesPerProject: 300, members: 3, storageMb: 300, snapshots: 5 },
     features: [
       "Volume-weighted WBS rollup",
       "Dependencies, blockers & linked nodes",
@@ -55,69 +55,65 @@ export const PLANS: Plan[] = [
     ],
   },
   {
-    id: "team",
-    name: "Team",
-    tagline: "For a single contractor running live projects on site.",
-    price: "$19",
-    priceSub: "per editor / month",
-    cta: "Start free",
+    id: "pro",
+    name: "Pro",
+    tagline: "For a contractor running live projects on site.",
+    price: "60 AED",
+    priceSub: "/ month",
+    cta: "Upgrade to Pro",
     ctaTo: "/signup",
-    limits: { projects: 25, nodesPerProject: 5_000, members: 25, storageGb: 25, snapshots: 90 },
+    highlighted: true,
+    limits: { projects: 5, nodesPerProject: 5_000, members: 50, storageMb: 2_048, snapshots: 50 },
     features: [
       "Everything in Free, plus:",
-      "WBS import / export (JSON)",
-      "Flowchart report",
-      "90-day snapshot history",
+      "5 projects · 50 member seats",
+      "5,000 nodes per project",
+      "2 GB attachments · 50 snapshots",
+      "WBS import / export + Flowchart report",
       "Email support",
     ],
   },
   {
-    id: "business",
-    name: "Business",
+    id: "pro_max",
+    name: "Pro Max",
     tagline: "For EPCs coordinating many disciplines and stakeholders.",
-    price: "$39",
-    priceSub: "per editor / month",
-    cta: "Start free",
+    price: "120 AED",
+    priceSub: "/ month",
+    cta: "Upgrade to Pro Max",
     ctaTo: "/signup",
-    highlighted: true,
-    limits: { projects: 150, nodesPerProject: 20_000, members: 100, storageGb: 100, snapshots: null },
+    limits: { projects: 12, nodesPerProject: 12_000, members: 120, storageMb: 5_120, snapshots: 120 },
     features: [
-      "Everything in Team, plus:",
-      "Unlimited snapshot history",
-      "Usage analytics & org dashboards",
-      "Advanced roles & invite controls",
+      "Everything in Pro, plus:",
+      "12 projects · 120 member seats",
+      "12,000 nodes per project",
+      "5 GB attachments · 120 snapshots",
       "Priority support",
-    ],
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    tagline: "For programs that need security, scale and a contract.",
-    price: "Custom",
-    priceSub: "talk to us",
-    cta: "Contact us",
-    ctaTo: "mailto:hello@cascade-epc.com?subject=CASCADE-EPC%20Enterprise",
-    limits: { projects: null, nodesPerProject: null, members: null, storageGb: null, snapshots: null },
-    features: [
-      "Everything in Business, plus:",
-      "SSO / SAML & SCIM provisioning",
-      "Audit log & data residency",
-      "Dedicated success manager",
-      "Uptime SLA & onboarding",
     ],
   },
 ];
 
-/** Format a limit value for display ("Unlimited" when null). */
+/** Format a count limit for display ("Unlimited" when null). */
 export function fmtLimit(n: number | null): string {
   return n === null ? "Unlimited" : n.toLocaleString();
 }
 
+/** Format a storage limit given in MB, collapsing whole GB (2048 → "2 GB"). */
+export function fmtStorage(mb: number | null): string {
+  if (mb === null) return "Unlimited";
+  if (mb >= 1024 && mb % 1024 === 0) return `${mb / 1024} GB`;
+  return `${mb} MB`;
+}
+
+/** Look up a plan by its tier id, falling back to Free for unknown tiers. */
+export function planById(id: string | null | undefined): Plan {
+  return PLANS.find((p) => p.id === (id ?? "free")) ?? PLANS[0]!;
+}
+
 /** Rows for the side-by-side comparison matrix. */
-export const COMPARISON: { label: string; key: keyof PlanLimits; suffix?: string }[] = [
+export const COMPARISON: { label: string; key: keyof PlanLimits; fmt?: (v: number | null) => string }[] = [
   { label: "Projects", key: "projects" },
   { label: "Nodes per project", key: "nodesPerProject" },
-  { label: "Members (seats)", key: "members" },
-  { label: "Attachment storage", key: "storageGb", suffix: " GB" },
+  { label: "Member seats", key: "members" },
+  { label: "Attachment storage", key: "storageMb", fmt: fmtStorage },
   { label: "Snapshot history", key: "snapshots" },
 ];

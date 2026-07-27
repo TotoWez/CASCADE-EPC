@@ -1,24 +1,30 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Check, Sparkles } from "lucide-react";
 import { PublicHeader, PublicFooter } from "@/components/PublicHeader";
-import { PLANS, COMPARISON, fmtLimit, type Plan, type PlanLimits } from "@/lib/plans";
+import { useAuth } from "@/store/auth";
+import { PLANS, COMPARISON, fmtLimit, type Plan } from "@/lib/plans";
+
+type ComparisonRow = (typeof COMPARISON)[number];
 
 function PlanCta({ plan }: { plan: Plan }) {
+  const authed = useAuth((s) => s.status === "authed");
+  // Signed-in visitors upgrade from their workspace billing page; guests sign up.
+  const to = authed ? (plan.id === "free" ? "/app" : "/app/org") : plan.ctaTo;
+  const label = authed && plan.id !== "free" ? plan.cta : authed ? "Open app" : plan.cta;
   const cls = plan.highlighted
     ? "bg-brand-blue text-white hover:bg-brand-blue-dark"
     : "border border-line text-ink-dim hover:border-ink-mute hover:text-ink";
   const base = "mt-5 inline-flex w-full items-center justify-center rounded px-4 py-2 font-mono text-2xs uppercase tracking-widest";
-  return plan.ctaTo.startsWith("mailto:") ? (
-    <a href={plan.ctaTo} className={`${base} ${cls}`}>{plan.cta}</a>
+  return to.startsWith("mailto:") ? (
+    <a href={to} className={`${base} ${cls}`}>{label}</a>
   ) : (
-    <Link to={plan.ctaTo} className={`${base} ${cls}`}>{plan.cta}</Link>
+    <Link to={to} className={`${base} ${cls}`}>{label}</Link>
   );
 }
 
-function comparisonCell(plan: Plan, key: keyof PlanLimits, suffix?: string): string {
-  const v = plan.limits[key];
-  if (v === null) return "Unlimited";
-  return `${fmtLimit(v)}${suffix ?? ""}`;
+function comparisonCell(plan: Plan, row: ComparisonRow): string {
+  const v = plan.limits[row.key];
+  return row.fmt ? row.fmt(v) : fmtLimit(v);
 }
 
 export function Pricing() {
@@ -38,12 +44,12 @@ export function Pricing() {
             portfolio. Start free and grow into it.
           </p>
           <p className="rise-in rise-in-2 mt-4 inline-flex items-center gap-2 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-4 py-1.5 font-mono text-2xs uppercase tracking-widest text-brand-blue-light">
-            <Sparkles size={13} /> Free during the beta · prices are provisional
+            <Sparkles size={13} /> Flat monthly pricing in AED · cancel anytime
           </p>
         </div>
 
         {/* Plan cards */}
-        <div className="grid gap-4 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
@@ -91,7 +97,7 @@ export function Pricing() {
                 <tr key={row.key} className="border-b border-line/60 last:border-0">
                   <td className="px-4 py-2.5 text-ink-dim">{row.label}</td>
                   {PLANS.map((p) => (
-                    <td key={p.id} className="px-4 py-2.5 font-mono text-2xs text-ink">{comparisonCell(p, row.key, row.suffix)}</td>
+                    <td key={p.id} className="px-4 py-2.5 font-mono text-2xs text-ink">{comparisonCell(p, row)}</td>
                   ))}
                 </tr>
               ))}

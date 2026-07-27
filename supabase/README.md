@@ -16,6 +16,8 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
 | `0008_fix_project_insert_and_slug.sql` | Fix project-creation WITH CHECK (re-create is_org_admin) + drop global-unique org slug |
 | `0009_fix_projects_select.sql` | Fix project INSERT…RETURNING read-back (projects_select no longer self-queries projects) |
 | `0010_lock_platform_role.sql` | **Security:** trigger blocking users from self-setting `platform_role` (privilege escalation) |
+| `0011_plan_limits_and_hardening.sql` | Plan-limit triggers (projects/nodes/seats/snapshots/attachments), attachment MIME+size validation, `accept_invitation` race fix |
+| `0012_platform_and_billing.sql` | Owner-console + Stripe billing: retier `plan_limits()` to free/pro/pro_max (AED, storage in MB), billing-column lock trigger, org `suspended` + suspend guard in `auth_project_role`, `platform_overview`/`platform_set_tier`/`platform_set_suspended` RPCs |
 | `seed.sql` | Optional demo org/project/WBS (attaches to first profile) |
 
 ## Apply to a hosted project (free tier)
@@ -43,6 +45,13 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
   subtree assigned to them; Supervisor only directly-assigned nodes.
 - **Cross-role writes** (role-scoped invites, one-entry bulk edits, snapshots,
   clear-activity) go through SECURITY DEFINER RPCs that re-check `auth.uid()`.
+- **Billing / plan columns** (`subscription_tier`, `stripe_*`, `subscription_status`,
+  `current_period_end`, `suspended`) are locked by a BEFORE-UPDATE trigger (0012):
+  `authenticated`/`anon` cannot change them, so a customer can't self-upgrade. Only the
+  service-role webhook, the SQL editor, or the platform RPCs (`platform_set_tier` /
+  `platform_set_suspended`, gated to `is_platform_staff()`) may. A `suspended` org
+  returns a null role from `auth_project_role`, cutting off all project access at the
+  keystone while leaving the org shell visible for a suspended notice.
 
 > **Tooling note — SQL call-chain blind spot.** Static analysis that builds a
 > call graph from these migrations (e.g. tree-sitter / graphify) indexes each

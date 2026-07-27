@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LayoutGrid, LogOut, UserRound } from "lucide-react";
+import { LayoutGrid, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { Brand } from "@/components/Brand";
 import { AboutModal } from "@/components/AboutModal";
 import { ShortcutsModal } from "@/components/ShortcutsModal";
@@ -18,7 +18,9 @@ function isEditableTarget(el: EventTarget | null): boolean {
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const profile = useAuth((s) => s.profile);
+  const orgs = useAuth((s) => s.orgs);
   const signOut = useAuth((s) => s.signOut);
+  const suspended = orgs.some((o) => o.suspended);
   const [about, setAbout] = useState(false);
   const [shortcuts, setShortcuts] = useState(false);
 
@@ -46,6 +48,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <LayoutGrid size={16} />
               <span className="hidden sm:inline">Home</span>
             </button>
+            {profile?.platform_role && (
+              <Link to="/app/platform" className="chip bg-surface" title="Platform owner console">
+                <ShieldCheck size={16} />
+                <span className="hidden sm:inline">Platform</span>
+              </Link>
+            )}
             <ThemeToggle />
             <Link to="/app/profile" className="chip bg-surface" title="Profile">
               <UserRound size={16} />
@@ -65,6 +73,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+      {suspended && (
+        <div className="border-b border-status-blocked/40 bg-status-blocked/10 px-4 py-2 text-center font-mono text-2xs uppercase tracking-widest text-status-blocked">
+          This workspace is suspended — project access is paused. Contact hello@cascade-epc.com.
+        </div>
+      )}
       <main className="flex-1">{children}</main>
       <AboutModal open={about} onClose={() => setAbout(false)} />
       <ShortcutsModal open={shortcuts} onClose={() => setShortcuts(false)} />

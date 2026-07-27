@@ -18,6 +18,7 @@ export interface OrgRef {
   orgId: string;
   name: string;
   orgRole: OrgRole;
+  suspended: boolean;
 }
 
 type Status = "loading" | "authed" | "anon";
@@ -37,12 +38,12 @@ interface AuthState {
 async function loadProfileAndOrgs(userId: string): Promise<{ profile: ProfileRow | null; orgs: OrgRef[] }> {
   const [{ data: profile }, { data: members }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-    supabase.from("org_members").select("org_role, organizations(id, name)").eq("user_id", userId),
+    supabase.from("org_members").select("org_role, organizations(id, name, suspended)").eq("user_id", userId),
   ]);
   const orgs: OrgRef[] = [];
   for (const m of (members ?? []) as any[]) {
     const o = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations;
-    if (o) orgs.push({ orgId: o.id, name: o.name, orgRole: m.org_role });
+    if (o) orgs.push({ orgId: o.id, name: o.name, orgRole: m.org_role, suspended: Boolean(o.suspended) });
   }
   return { profile: (profile as ProfileRow) ?? null, orgs };
 }

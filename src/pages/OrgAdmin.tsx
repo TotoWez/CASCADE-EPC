@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Navigate, Link } from "react-router-dom";
-import { ArrowLeft, Building2, ImagePlus, Loader2 } from "lucide-react";
+import { Navigate, Link, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Building2, CreditCard, ImagePlus, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
 import { useAuth } from "@/store/auth";
 import { getOrg, updateOrg, uploadBranding, usageStats, type Org, type UsageStats } from "@/lib/api/org";
+import { startCheckout, openPortal } from "@/lib/api/billing";
 import { PLANS, type Plan } from "@/lib/plans";
 import { toast } from "@/store/toast";
 
@@ -23,7 +24,9 @@ export function OrgAdmin() {
   const [usage, setUsage] = useState<UsageStats | null>(null);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [billing, setBilling] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [params, setParams] = useSearchParams();
 
   useEffect(() => {
     if (!adminOrg) return;
@@ -36,6 +39,17 @@ export function OrgAdmin() {
       .catch((e) => toast.fail(e))
       .finally(() => setLoading(false));
   }, [adminOrg]);
+
+  // Toast the result of a returning Stripe Checkout, then clean the URL.
+  useEffect(() => {
+    const b = params.get("billing");
+    if (b === "success") toast.success("Subscription updated — thank you!");
+    else if (b === "cancelled") toast.info("Checkout cancelled.");
+    if (b) {
+      params.delete("billing");
+      setParams(params, { replace: true });
+    }
+  }, [params, setParams]);
 
   if (!adminOrg) return <Navigate to="/app" replace />;
 
@@ -50,6 +64,28 @@ export function OrgAdmin() {
       toast.fail(err);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function onCheckout(tier: "pro" | "pro_max") {
+    if (!adminOrg) return;
+    setBilling(true);
+    try {
+      await startCheckout(adminOrg.orgId, tier); // redirects to Stripe on success
+    } catch (e) {
+      toast.fail(e);
+      setBilling(false);
+    }
+  }
+
+  async function onManageBilling() {
+    if (!adminOrg) return;
+    setBilling(true);
+    try {
+      await openPortal(adminOrg.orgId); // redirects to the Stripe portal on success
+    } catch (e) {
+      toast.fail(e);
+      setBilling(false);
     }
   }
 
@@ -109,7 +145,7 @@ export function OrgAdmin() {
               <Meter
                 label="Attachment storage"
                 used={Math.round((usage?.storageBytes ?? 0) / 1024 / 1024)}
-                cap={planFor(org?.subscriptionTier).limits.storageGb === null ? null : planFor(org?.subscriptionTier).limits.storageGb! * 1024}
+                cap={planFor(org?.subscriptionTier).limits.storageMb}
                 unit="MB"
               />
             </div>
@@ -118,6 +154,29 @@ export function OrgAdmin() {
               {planFor(org?.subscriptionTier).limits.nodesPerProject ?? "unlimited"}). Need more room?{" "}
               <Link to="/pricing" className="text-brand-blue hover:underline">See plans</Link>.
             </p>
+
+            <h2 className="mt-10 font-mono text-2xs uppercase tracking-widest text-ink-mute">Billing</h2>
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface p-4">
+              <p className="text-sm text-ink-dim">
+                Current plan: <span className="font-mono text-ink">{planFor(org?.subscriptionTier).name}</span>
+              </p>
+              <div className="ml-auto flex flex-wrap gap-2">
+                {org?.subscriptionTier === "free" ? (
+                  <>
+                    <Button variant="outline" size="sm" loading={billing} onClick={() => onCheckout("pro")}>
+                      Upgrade to Pro
+                    </Button>
+                    <Button size="sm" loading={billing} onClick={() => onCheckout("pro_max")}>
+                      Upgrade to Pro Max
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="outline" size="sm" loading={billing} onClick={onManageBilling}>
+                    <CreditCard size={13} /> Manage billing
+                  </Button>
+                )}
+              </div>
+            </div>
           </>
         )}
       </div>

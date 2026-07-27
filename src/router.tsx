@@ -11,6 +11,7 @@ import { Privacy, Terms } from "@/pages/Legal";
 import { AppHome } from "@/pages/AppHome";
 import { Profile } from "@/pages/Profile";
 import { OrgAdmin } from "@/pages/OrgAdmin";
+import { PlatformAdmin } from "@/pages/PlatformAdmin";
 import { ProjectWorkspace } from "@/pages/ProjectWorkspace";
 import { NotFound } from "@/pages/NotFound";
 
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
   { path: "/app", element: <RequireAuth><AppHome /></RequireAuth> },
   { path: "/app/profile", element: <RequireAuth><Profile /></RequireAuth> },
   { path: "/app/org", element: <RequireAuth><OrgAdmin /></RequireAuth> },
+  { path: "/app/platform", element: <RequireAuth><PlatformAdmin /></RequireAuth> },
   { path: "/app/projects/:id", element: <RequireAuth><ProjectWorkspace /></RequireAuth> },
 
   { path: "*", element: <NotFound /> },
