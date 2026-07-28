@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import type { Project, WbsNode } from "@/lib/types";
 import { buildChildrenIndex, toNodeMap, getChildren } from "@/lib/domain/tree";
 import { computeEffectiveProgress } from "@/lib/domain/rollup";
-import { displayStatus } from "@/lib/domain/status";
+import { displayStatus, progressColor } from "@/lib/domain/status";
 import { siblingAccent } from "@/lib/domain/color";
 import { drawFooter, getMarkPng, hslToRgb, reportFilename, sanitize, STATUS_RGB, RGB } from "./common";
 
@@ -85,7 +85,7 @@ export async function flowchartReport(project: Project, nodes: WbsNode[]) {
     doc.text(sanitize(n.title), x + S(3), y + S(11), { maxWidth: bw - S(6) });
     // progress bar
     doc.setFillColor(230, 233, 238); doc.rect(x + S(3), y + bh - S(3.5), bw - S(6), S(1.6), "F");
-    doc.setFillColor(...STATUS_RGB[status]); doc.rect(x + S(3), y + bh - S(3.5), (bw - S(6)) * pct / 100, S(1.6), "F");
+    doc.setFillColor(...hslToRgb(progressColor(pct))); doc.rect(x + S(3), y + bh - S(3.5), (bw - S(6)) * pct / 100, S(1.6), "F");
   }
 
   drawFooter(doc, project);

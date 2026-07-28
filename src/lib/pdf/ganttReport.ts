@@ -2,8 +2,8 @@ import jsPDF from "jspdf";
 import type { Project, WbsNode } from "@/lib/types";
 import { buildChildrenIndex, toNodeMap, getChildren } from "@/lib/domain/tree";
 import { computeEffectiveProgress } from "@/lib/domain/rollup";
-import { displayStatus } from "@/lib/domain/status";
-import { drawHeader, drawFooter, getMarkPng, reportFilename, sanitize, STATUS_RGB, RGB } from "./common";
+import { progressColor } from "@/lib/domain/status";
+import { drawHeader, drawFooter, getMarkPng, reportFilename, sanitize, hslToRgb, RGB } from "./common";
 
 const parse = (s: string | null): number | null => {
   if (!s) return null;
@@ -57,7 +57,6 @@ export async function ganttReport(project: Project, nodes: WbsNode[]) {
   y += 2;
   for (const n of flat) {
     if (y > h - 14) { doc.addPage(); y = 14; }
-    const status = displayStatus(n, eff);
     const pct = eff[n.id] ?? 0;
     doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...RGB.ink);
     doc.text(sanitize(`${n.nodeCode} ${n.title}`), 8, y + 3, { maxWidth: labelW - 10 });
@@ -66,7 +65,7 @@ export async function ganttReport(project: Project, nodes: WbsNode[]) {
     const d = parse(n.dueDate) ?? pe ?? max;
     const bx = x(Math.min(s, d)), bw = Math.max(2, x(Math.max(s, d)) - x(Math.min(s, d)));
     doc.setFillColor(225, 230, 236); doc.rect(bx, y, bw, 3.4, "F");
-    doc.setFillColor(...STATUS_RGB[status]); doc.rect(bx, y, (bw * pct) / 100, 3.4, "F");
+    doc.setFillColor(...hslToRgb(progressColor(pct))); doc.rect(bx, y, (bw * pct) / 100, 3.4, "F");
     y += rowH;
   }
 

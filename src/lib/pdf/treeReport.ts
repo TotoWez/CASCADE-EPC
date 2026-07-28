@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import type { Project, WbsNode } from "@/lib/types";
 import { buildChildrenIndex, toNodeMap, getChildren, getAncestorIds } from "@/lib/domain/tree";
 import { computeEffectiveProgress } from "@/lib/domain/rollup";
-import { displayStatus } from "@/lib/domain/status";
+import { displayStatus, progressColor } from "@/lib/domain/status";
 import { siblingAccent } from "@/lib/domain/color";
 import {
   drawHeader, drawFooter, drawSummary, drawLegend, getMarkPng, reportFilename, sanitize,
@@ -77,7 +77,7 @@ async function buildTreeReport(project: Project, nodes: WbsNode[], kind: Kind, i
     // progress bar + percent (right aligned)
     const barW = 36, barX = w - 8 - barW - 12;
     doc.setFillColor(230, 233, 238); doc.rect(barX, y - 2.5, barW, 3, "F");
-    doc.setFillColor(...STATUS_RGB[status]); doc.rect(barX, y - 2.5, (barW * pct) / 100, 3, "F");
+    doc.setFillColor(...hslToRgb(progressColor(pct))); doc.rect(barX, y - 2.5, (barW * pct) / 100, 3, "F");
     doc.setTextColor(...RGB.ink); doc.setFontSize(8); doc.setFont("helvetica", "bold");
     doc.text(`${pct}%`, w - 8, y, { align: "right" });
     y += rowH;
