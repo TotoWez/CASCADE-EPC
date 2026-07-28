@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("public · auth screens", () => {
   test("sign-in renders and surfaces an error (no successful login with dummy creds)", async ({ page }) => {
     await page.goto("/signin");
-    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
 
     await page.getByLabel("Work email").fill("nobody@example.com");
     await page.getByLabel("Password", { exact: true }).fill("wrong-password-123");
@@ -16,7 +16,7 @@ test.describe("public · auth screens", () => {
 
   test("sign-up renders and links back to sign-in", async ({ page }) => {
     await page.goto("/signup");
-    await expect(page.getByRole("heading", { name: /create your organization/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /create your company workspace/i })).toBeVisible();
     await page.getByRole("link", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(/\/signin$/);
   });

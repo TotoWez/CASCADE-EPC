@@ -16,7 +16,7 @@ test.describe.serial("app · live backend", () => {
     await expect(page).toHaveURL(/\/app/);
     // Either the projects dashboard or onboarding renders.
     await expect(
-      page.getByRole("heading", { name: "Projects" }).or(page.getByRole("heading", { name: /create your organization/i })),
+      page.getByRole("heading", { name: "Projects" }).or(page.getByRole("heading", { name: /create your company workspace/i })),
     ).toBeVisible();
   });
 

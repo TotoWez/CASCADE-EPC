@@ -11,8 +11,8 @@ test.describe("public · landing + routing", () => {
     await page.goto("/");
     await expect(page).toHaveTitle(/CASCADE-EPC/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("CASCADE");
-    // feature cards (6)
-    await expect(page.getByRole("heading", { level: 3 })).toHaveCount(6);
+    // section headings: 3 how-it-works steps + 6 feature cards
+    await expect(page.getByRole("heading", { level: 3 })).toHaveCount(9);
     // shared footer
     await expect(page.getByText(/Plan it\. Track it\. CASCADE it\./i).last()).toBeVisible();
     // status legend chips
@@ -24,7 +24,7 @@ test.describe("public · landing + routing", () => {
     await openNavIfMobile(page);
     await page.getByRole("link", { name: "Sign up", exact: true }).first().click();
     await expect(page).toHaveURL(/\/signup$/);
-    await expect(page.getByRole("heading", { name: /create your organization/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /create your company workspace/i })).toBeVisible();
 
     await page.goto("/");
     await openNavIfMobile(page);

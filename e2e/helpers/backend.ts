@@ -24,7 +24,7 @@ export async function login(page: Page): Promise<void> {
 
 /** Ensure the user has an org; create one through onboarding if needed. */
 export async function ensureOrg(page: Page): Promise<void> {
-  if (/create your organization/i.test(await page.locator("body").innerText())) {
+  if (/create your company workspace/i.test(await page.locator("body").innerText())) {
     await page.getByLabel(/organization name/i).fill(`E2E Org ${Date.now()}`);
     await page.getByRole("button", { name: /create organization/i }).click();
     await page.getByRole("heading", { name: "Projects" }).waitFor();
