@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Pencil, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Section } from "@/components/ui/Section";
 import { ProjectForm } from "@/features/projects/ProjectForm";
 import { useProject } from "@/store/project";
 import { useTree } from "@/store/tree";
@@ -78,41 +79,42 @@ export function ProjectControl() {
   const settings = project.settings;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="flex items-center justify-between">
-        <h2 className="font-brand text-lg tracking-wide text-ink">Project control</h2>
-        {editable && (
-          <Button variant="outline" onClick={openEdit}>
-            <Pencil size={14} /> Edit
-          </Button>
-        )}
-      </div>
-
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <PartyCard label="Client" name={project.client} logo={project.clientLogoUrl} />
-        <PartyCard label="Consultant" name={project.consultant} logo={project.consultantLogoUrl} />
-        <PartyCard label="Contractor" name={project.contractor} logo={project.contractorLogoUrl} />
-        <PartyCard label="Sub-Contractor" name={project.subContractor} logo={project.subContractorLogoUrl} />
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded border border-line bg-canvas p-3">
-          <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">Start</p>
-          <p className="mt-1 font-mono text-sm text-ink">{project.startDate ?? "—"}</p>
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+      <Section
+        title="Project parties"
+        action={
+          editable ? (
+            <Button variant="outline" size="sm" onClick={openEdit}>
+              <Pencil size={14} /> Edit
+            </Button>
+          ) : undefined
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <PartyCard label="Client" name={project.client} logo={project.clientLogoUrl} />
+          <PartyCard label="Consultant" name={project.consultant} logo={project.consultantLogoUrl} />
+          <PartyCard label="Contractor" name={project.contractor} logo={project.contractorLogoUrl} />
+          <PartyCard label="Sub-Contractor" name={project.subContractor} logo={project.subContractorLogoUrl} />
         </div>
-        <div className="rounded border border-line bg-canvas p-3">
-          <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">End</p>
-          <p className="mt-1 font-mono text-sm text-ink">{project.endDate ?? "—"}</p>
-        </div>
-        <div className="rounded border border-line bg-canvas p-3">
-          <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">Revised</p>
-          <p className="mt-1 font-mono text-sm text-ink">{project.revisedDate ?? "—"}</p>
-        </div>
-      </div>
+      </Section>
 
-      <div className="mt-4 rounded border border-line bg-canvas p-4">
-        <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">Settings</p>
-        <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-3">
+      <Section title="Schedule">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            ["Start", project.startDate],
+            ["End", project.endDate],
+            ["Revised", project.revisedDate],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded border border-line bg-canvas p-3">
+              <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">{label}</p>
+              <p className="mt-1 font-mono text-sm text-ink">{value ?? "—"}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Settings">
+        <dl className="grid gap-2 text-sm sm:grid-cols-3">
           <div className="flex justify-between gap-2">
             <dt className="text-ink-dim">Require HSE action</dt>
             <dd className="text-ink">{settings.requireHseAction ? "On" : "Off"}</dd>
@@ -126,21 +128,22 @@ export function ProjectControl() {
             <dd className="text-ink">{settings.dueWindowN} days</dd>
           </div>
         </dl>
-      </div>
+      </Section>
 
       {(can(role, "wbs.export") || can(role, "wbs.import")) && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded border border-line bg-canvas p-4">
-          <p className="font-mono text-2xs uppercase tracking-widest text-ink-mute">WBS data</p>
-          {can(role, "wbs.export") && (
-            <Button variant="outline" onClick={onExport}><Download size={14} /> Export JSON</Button>
-          )}
-          {can(role, "wbs.import") && (
-            <>
-              <Button variant="outline" loading={importing} onClick={() => fileRef.current?.click()}><Upload size={14} /> Import JSON</Button>
-              <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void onImportFile(f); e.currentTarget.value = ""; }} />
-            </>
-          )}
-        </div>
+        <Section title="WBS data">
+          <div className="flex flex-wrap items-center gap-3">
+            {can(role, "wbs.export") && (
+              <Button variant="outline" onClick={onExport}><Download size={14} /> Export JSON</Button>
+            )}
+            {can(role, "wbs.import") && (
+              <>
+                <Button variant="outline" loading={importing} onClick={() => fileRef.current?.click()}><Upload size={14} /> Import JSON</Button>
+                <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void onImportFile(f); e.currentTarget.value = ""; }} />
+              </>
+            )}
+          </div>
+        </Section>
       )}
 
       {editing && (

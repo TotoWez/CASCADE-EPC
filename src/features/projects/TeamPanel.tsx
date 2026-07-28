@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { UserPlus, Trash2, UserRound, Ticket } from "lucide-react";
+import { UserPlus, Trash2, UserRound, Ticket, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { InviteModal } from "@/features/projects/InviteModal";
 import { useProject } from "@/store/project";
 import { can } from "@/lib/permissions";
@@ -73,11 +74,16 @@ export function TeamPanel() {
         )}
       </div>
 
-      <div className="mt-6 divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
-        {members.length === 0 ? (
-          <p className="px-4 py-6 text-center text-sm text-ink-dim">No members yet.</p>
-        ) : (
-          members.map((m) => (
+      {members.length === 0 ? (
+        <div className="mt-6">
+          <EmptyState
+            icon={Users}
+            message="No one's on this project yet. Invite a teammate, or assign an existing member of your organization."
+          />
+        </div>
+      ) : (
+        <div className="mt-6 divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
+          {members.map((m) => (
             <div key={m.userId} className="flex items-center gap-3 px-4 py-3">
               <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-surface-2">
                 {m.avatarUrl ? <img src={m.avatarUrl} alt="" className="h-full w-full object-cover" /> : <UserRound size={16} className="text-ink-mute" />}
@@ -94,9 +100,9 @@ export function TeamPanel() {
                 </button>
               )}
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       {canInvite && invites.filter((i) => !i.acceptedAt).length > 0 && (
         <>
