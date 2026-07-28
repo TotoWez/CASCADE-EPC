@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FolderOpen, Building2, CalendarRange } from "lucide-react";
+import { Plus, FolderOpen, CalendarRange, Settings2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { ProjectForm } from "@/features/projects/ProjectForm";
 import { listProjects } from "@/lib/api/projects";
@@ -42,29 +44,22 @@ export function ProjectsList() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-brand text-2xl tracking-wide text-ink">Projects</h1>
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-dim">
-              <Building2 size={14} /> {orgs.map((o) => o.name).join(", ") || "No organization"}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {adminOrgs.length > 0 && (
-              <Link
-                to="/app/org"
-                className="rounded border border-line bg-surface px-3 py-2 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink hover:border-ink-mute"
-              >
-                Org settings
-              </Link>
-            )}
-            {adminOrgs.length > 0 && (
-              <Button onClick={openCreate}>
-                <Plus size={15} /> New project
-              </Button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          kicker={orgs.map((o) => o.name).join(", ") || "No organization"}
+          title="Projects"
+          actions={
+            adminOrgs.length > 0 ? (
+              <>
+                <Link to="/app/org" className="chip bg-surface">
+                  <Settings2 size={14} /> Org settings
+                </Link>
+                <Button onClick={openCreate}>
+                  <Plus size={15} /> New project
+                </Button>
+              </>
+            ) : undefined
+          }
+        />
 
         {loading ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,13 +68,23 @@ export function ProjectsList() {
             ))}
           </div>
         ) : projects.length === 0 ? (
-          <div className="mt-10 rounded-card border border-dashed border-line bg-surface p-12 text-center">
-            <FolderOpen className="mx-auto text-ink-mute" size={28} />
-            <p className="mt-3 text-sm text-ink-dim">
-              {adminOrgs.length > 0
-                ? "No projects yet. Create your first project to build its WBS."
-                : "You have no projects yet. Ask your Admin or Manager to add you."}
-            </p>
+          <div className="mt-8">
+            <EmptyState
+              icon={FolderOpen}
+              title={adminOrgs.length > 0 ? "No projects yet" : "Nothing here yet"}
+              message={
+                adminOrgs.length > 0
+                  ? "Create your first project to start building its work breakdown."
+                  : "You haven't been added to any projects. Ask your Admin or Manager to bring you in."
+              }
+              action={
+                adminOrgs.length > 0 ? (
+                  <Button onClick={openCreate}>
+                    <Plus size={15} /> New project
+                  </Button>
+                ) : undefined
+              }
+            />
           </div>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

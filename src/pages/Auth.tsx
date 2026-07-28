@@ -68,8 +68,8 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <MailCheck className="text-brand-green" size={36} />
           <p className="text-sm text-ink-dim">
-            We sent a confirmation link to <span className="text-ink">{email}</span>. After
-            confirming, you'll set up your organization and become its Admin.
+            We sent a confirmation link to <span className="text-ink">{email}</span>. Open it to
+            finish setting up your workspace — you'll be the Admin.
           </p>
         </div>
       </AuthCard>
@@ -78,11 +78,11 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
 
   return (
     <AuthCard
-      title={isSignup ? "Create your organization" : "Sign in"}
+      title={isSignup ? "Create your company workspace" : "Welcome back"}
       subtitle={
         isSignup
-          ? "Sign up to become the Admin for your customer organization."
-          : "Welcome back. Sign in to your projects."
+          ? "Set up your organization — you'll be its Admin and can invite your team."
+          : "Sign in to pick up where your projects left off."
       }
       footer={
         isSignup ? (
@@ -94,9 +94,9 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
           </>
         ) : (
           <>
-            Need an organization?{" "}
+            New to CASCADE-EPC?{" "}
             <Link to="/signup" className="text-brand-blue hover:underline">
-              Sign up
+              Create a workspace
             </Link>
           </>
         )
@@ -157,6 +157,14 @@ export function Auth({ mode }: { mode: "signin" | "signup" }) {
         <p className="mt-4 text-center">
           <Link to="/forgot" className="text-2xs text-ink-mute hover:text-ink">
             Forgot password?
+          </Link>
+        </p>
+      )}
+      {isSignup && (
+        <p className="mt-4 text-center text-2xs text-ink-mute">
+          Invited by a teammate?{" "}
+          <Link to="/join" className="text-brand-blue hover:underline">
+            Join with a code
           </Link>
         </p>
       )}

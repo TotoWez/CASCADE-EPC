@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, Link } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Loader2, Ban, RotateCcw } from "lucide-react";
+import { Navigate } from "react-router-dom";
+import { Loader2, Ban, RotateCcw } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/store/auth";
 import { PLANS, planById, fmtStorage, type PlanId } from "@/lib/plans";
 import { platformOverview, setTier, setSuspended, type PlatformOrg } from "@/lib/api/platform";
@@ -38,6 +39,16 @@ export function PlatformAdmin() {
       (o) => o.name.toLowerCase().includes(q) || (o.ownerEmail ?? "").toLowerCase().includes(q),
     );
   }, [orgs, query]);
+
+  const summary = useMemo(() => {
+    const byTier: Record<string, number> = {};
+    let suspended = 0;
+    for (const o of orgs) {
+      byTier[o.tier] = (byTier[o.tier] ?? 0) + 1;
+      if (o.suspended) suspended++;
+    }
+    return { total: orgs.length, pro: byTier.pro ?? 0, proMax: byTier.pro_max ?? 0, suspended };
+  }, [orgs]);
 
   // Auth still resolving — wait before deciding to redirect.
   if (status === "loading" || (status === "authed" && !profile)) {
@@ -91,14 +102,25 @@ export function PlatformAdmin() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <Link to="/app" className="inline-flex items-center gap-1 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
-          <ArrowLeft size={14} /> Projects
-        </Link>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="flex items-center gap-2 font-brand text-2xl tracking-wide text-ink">
-            <ShieldCheck size={22} /> Platform
-          </h1>
-          <span className="count-badge">{orgs.length} customer{orgs.length === 1 ? "" : "s"}</span>
+        <PageHeader
+          kicker="Owner console"
+          title="Platform"
+          subtitle="Every workspace on CASCADE-EPC — plans, usage, and access."
+          actions={<span className="count-badge">{orgs.length} customer{orgs.length === 1 ? "" : "s"}</span>}
+        />
+
+        <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-4">
+          {[
+            ["Customers", summary.total],
+            ["Pro", summary.pro],
+            ["Pro Max", summary.proMax],
+            ["Suspended", summary.suspended],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-surface px-4 py-3">
+              <p className="font-brand text-2xs uppercase tracking-widest text-ink-mute">{label}</p>
+              <p className={`mt-0.5 font-mono text-lg ${label === "Suspended" && Number(value) > 0 ? "text-status-blocked" : "text-ink"}`}>{value}</p>
+            </div>
+          ))}
         </div>
 
         <div className="mt-6 max-w-sm">

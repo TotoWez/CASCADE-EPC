@@ -1,21 +1,19 @@
-import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, Keyboard, Users, Activity } from "lucide-react";
 import { PublicHeader, PublicFooter } from "@/components/PublicHeader";
+import { Section } from "@/components/ui/Section";
 import { KEYS } from "@/components/ShortcutsModal";
 
 const ROLES: [string, string][] = [
-  ["Admin", "Customer IT. Manages org, branding, projects, parties & dates, assigns a Project Manager."],
-  ["Manager", "Project Manager. Builds the WBS, assigns leaders, dependencies, categories, reports."],
-  ["Engineer", "Team Leader. Full control of their subtree; assigns members; can invite Supervisors/Viewers."],
-  ["Supervisor", "Team Member (site). Updates status/progress, dependencies & notes on assigned nodes; reports."],
-  ["QAQC", "Owns the QAQC gate (Closed / Pending) project-wide. Notes on any node."],
-  ["HSE", "Owns the HSE gate (Complied / Not-Complied). Notes on any node."],
-  ["Viewer", "Client / consultant, invite-by-link. Read-only dashboard + reports, optional comments."],
-  ["Developer", "Platform support. Full technical access across organizations."],
+  ["Admin", "Runs the company workspace — branding, projects, parties, dates, plan, and the team. Assigns a Project Manager to each project."],
+  ["Manager", "Project Manager. Builds the WBS, brings in leaders, sets dependencies and categories, and generates reports."],
+  ["Engineer", "Team Leader. Full control of their own branch; assigns members and can invite Supervisors and Viewers."],
+  ["Supervisor", "Team member on site. Updates status, progress, dependencies, and notes on their assigned work, and pulls reports."],
+  ["QAQC", "Owns the quality gate (Closed / Pending) across the project, and can note on any node."],
+  ["HSE", "Owns the safety gate (Complied / Not-Complied), and can note on any node."],
+  ["Viewer", "Client or consultant, invited by link. Read-only dashboard and reports — with comments if you allow it."],
+  ["Developer", "Platform support. Technical access across organizations when you need a hand."],
 ];
-
-// Keyboard map lives in ShortcutsModal (also shown in-app via the "?" key).
 
 const STATUSES: [string, string][] = [
   ["Not Started", "bg-status-notstarted"],
@@ -23,17 +21,6 @@ const STATUSES: [string, string][] = [
   ["Done", "bg-status-done"],
   ["Blocked", "bg-status-blocked"],
 ];
-
-function Card({ icon: Icon, title, children }: { icon: typeof Users; title: string; children: ReactNode }) {
-  return (
-    <section className="rounded-card border border-line bg-surface p-6">
-      <h2 className="flex items-center gap-2 font-brand text-sm uppercase tracking-widest text-ink">
-        <Icon size={16} className="text-brand-blue" /> {title}
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
 
 export function About() {
   return (
@@ -45,16 +32,17 @@ export function About() {
           <ArrowLeft size={14} /> Home
         </Link>
         <div>
-          <h1 className="rise-in font-brand text-3xl tracking-wide">About CASCADE-EPC</h1>
-          <p className="rise-in rise-in-1 mt-3 max-w-2xl text-ink-dim">
-            CASCADE-EPC is a hierarchical EPC execution tracker for substation, transmission, and
-            industrial projects. Teams plan the WBS, track real progress with volume-weighted rollup,
-            manage physical dependencies and blockers, mirror linked work, enforce QAQC/HSE gates, and
-            export client-ready reports — all in a fast, SCADA-grade interface.
+          <p className="rise-in font-mono text-2xs uppercase tracking-[0.25em] text-brand-blue-light">About</p>
+          <h1 className="rise-in rise-in-1 mt-1.5 font-brand text-3xl tracking-wide">CASCADE-EPC</h1>
+          <p className="rise-in rise-in-2 mt-3 max-w-2xl text-ink-dim">
+            CASCADE-EPC helps EPC teams run substation, transmission, and industrial projects from
+            one place. Plan the work breakdown, track real progress as it rolls up from the field,
+            keep dependencies and blockers visible, mirror linked work, hold QAQC and HSE sign-off
+            beside the work, and export client-ready reports — in a fast, SCADA-grade interface.
           </p>
         </div>
 
-        <Card icon={Users} title="Roles">
+        <Section icon={Users} title="Who does what">
           <dl className="grid gap-3 sm:grid-cols-2">
             {ROLES.map(([r, d]) => (
               <div key={r} className="rounded border border-line bg-canvas p-3">
@@ -63,10 +51,10 @@ export function About() {
               </div>
             ))}
           </dl>
-        </Card>
+        </Section>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card icon={Keyboard} title="Keyboard & interaction">
+          <Section icon={Keyboard} title="Keyboard & interaction">
             <table className="w-full text-sm">
               <tbody>
                 {KEYS.map(([action, key]) => (
@@ -77,9 +65,9 @@ export function About() {
                 ))}
               </tbody>
             </table>
-          </Card>
+          </Section>
 
-          <Card icon={Activity} title="Status model">
+          <Section icon={Activity} title="Status model">
             <ul className="space-y-2">
               {STATUSES.map(([label, cls]) => (
                 <li key={label} className="flex items-center gap-2 text-sm text-ink-dim">
@@ -87,20 +75,22 @@ export function About() {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-2xs text-ink-mute">A node is Blocked automatically while any dependency is not Done. QAQC & HSE gates are owned exclusively by their roles.</p>
-          </Card>
+            <p className="mt-3 text-2xs text-ink-mute">
+              A node turns Blocked automatically while any of its dependencies isn't Done. The QAQC
+              and HSE gates are owned exclusively by those roles.
+            </p>
+          </Section>
         </div>
 
-        <Card icon={Mail} title="Contact">
+        <Section icon={Mail} title="Talk to us">
           <p className="text-sm text-ink-dim">
-            Questions, demos, or onboarding support? Reach the team at{" "}
+            Questions, a demo, or a hand getting set up? We'd love to hear from you at{" "}
             <a href="mailto:hello@cascade-epc.com" className="text-brand-blue hover:underline">hello@cascade-epc.com</a>.
           </p>
           <a href="mailto:hello@cascade-epc.com" className="mt-4 inline-flex items-center gap-2 rounded bg-brand-blue px-4 py-2 font-mono text-2xs uppercase tracking-widest text-white hover:bg-brand-blue-dark">
             <Mail size={14} /> Email us
           </a>
-        </Card>
-
+        </Section>
       </main>
 
       <PublicFooter />

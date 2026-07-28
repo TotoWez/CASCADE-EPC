@@ -136,3 +136,55 @@ export async function deleteInvitation(id: string): Promise<void> {
   const { error } = await supabase.from("invitations").delete().eq("id", id);
   if (error) throw error;
 }
+
+// ---- Organization-level membership (migration 0013) ------------------------
+
+/** Invite someone to the ORGANIZATION (no specific project). Returns the code. */
+export async function createOrgInvitation(args: {
+  orgId: string;
+  email?: string | null;
+  expiresAt?: string | null;
+  maxUses?: number;
+}): Promise<string> {
+  const { data, error } = await supabase.rpc("create_org_invitation", {
+    p_org: args.orgId,
+    p_email: args.email ?? null,
+    p_expires_at: args.expiresAt ?? null,
+    p_max_uses: args.maxUses ?? 1,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+/** Pending org-level invitations (project_id IS NULL). */
+export async function listOrgInvitations(orgId: string): Promise<Invitation[]> {
+  const { data, error } = await supabase
+    .from("invitations")
+    .select("id, role, email, code, can_comment, expires_at, max_uses, uses, created_at, accepted_at")
+    .eq("org_id", orgId)
+    .is("project_id", null)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as any[]).map((i) => ({
+    id: i.id,
+    role: i.role,
+    email: i.email,
+    code: i.code,
+    canComment: i.can_comment,
+    expiresAt: i.expires_at,
+    maxUses: i.max_uses,
+    uses: i.uses,
+    createdAt: i.created_at,
+    acceptedAt: i.accepted_at,
+  }));
+}
+
+export async function setOrgMemberRole(orgId: string, userId: string, role: "admin" | "member"): Promise<void> {
+  const { error } = await supabase.rpc("set_org_member_role", { p_org: orgId, p_user: userId, p_role: role });
+  if (error) throw error;
+}
+
+export async function removeOrgMember(orgId: string, userId: string): Promise<void> {
+  const { error } = await supabase.rpc("remove_org_member", { p_org: orgId, p_user: userId });
+  if (error) throw error;
+}

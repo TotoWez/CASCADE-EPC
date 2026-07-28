@@ -1,14 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Building2, CreditCard, ImagePlus, Loader2 } from "lucide-react";
+import { ArrowLeft, CreditCard, ImagePlus, Loader2 } from "lucide-react";
+import clsx from "clsx";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Input";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Section } from "@/components/ui/Section";
 import { useAuth } from "@/store/auth";
 import { getOrg, updateOrg, uploadBranding, usageStats, type Org, type UsageStats } from "@/lib/api/org";
 import { startCheckout, openPortal } from "@/lib/api/billing";
+import { OrgMembers } from "@/features/org/OrgMembers";
 import { PLANS, type Plan } from "@/lib/plans";
 import { toast } from "@/store/toast";
+
+type OrgTab = "general" | "members" | "billing";
+const TABS: { id: OrgTab; label: string }[] = [
+  { id: "general", label: "General" },
+  { id: "members", label: "Members" },
+  { id: "billing", label: "Billing & usage" },
+];
 
 function planFor(tier: string | undefined): Plan {
   return PLANS.find((p) => p.id === (tier ?? "free")) ?? PLANS[0]!;
@@ -27,6 +38,7 @@ export function OrgAdmin() {
   const [billing, setBilling] = useState(false);
   const [loading, setLoading] = useState(true);
   const [params, setParams] = useSearchParams();
+  const [tab, setTab] = useState<OrgTab>(params.get("billing") ? "billing" : "general");
 
   useEffect(() => {
     if (!adminOrg) return;
@@ -110,74 +122,103 @@ export function OrgAdmin() {
         <Link to="/app" className="inline-flex items-center gap-1 font-mono text-2xs uppercase tracking-widest text-ink-dim hover:text-ink">
           <ArrowLeft size={14} /> Projects
         </Link>
-        <h1 className="mt-4 flex items-center gap-2 font-brand text-2xl tracking-wide text-ink">
-          <Building2 size={22} /> Organization
-        </h1>
+        <div className="mt-4">
+          <PageHeader
+            kicker="Organization"
+            title={org?.name || adminOrg.name}
+            subtitle="Manage your workspace, team, plan, and usage."
+          />
+        </div>
+
+        <nav className="mt-5 flex gap-1 border-b border-line">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={clsx(
+                "border-b-2 px-3 py-2 font-mono text-2xs uppercase tracking-widest transition-colors",
+                tab === t.id ? "border-brand-blue text-ink" : "border-transparent text-ink-mute hover:text-ink",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
 
         {loading ? (
           <div className="grid place-items-center py-20"><Loader2 className="animate-spin text-brand-blue" size={24} /></div>
         ) : (
-          <>
-            <div className="mt-8 flex items-center gap-4">
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="grid h-20 w-20 place-items-center overflow-hidden rounded border border-line bg-surface text-ink-mute hover:border-ink-mute"
-                title="Upload organization logo"
-              >
-                {org?.logoUrl ? <img src={org.logoUrl} alt="" className="h-full w-full object-contain p-2" /> : <ImagePlus size={20} />}
-              </button>
-              <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void onLogo(f); }} />
-              <div className="flex-1">
-                <Field label="Organization name" htmlFor="on">
-                  <Input id="on" value={name} onChange={(e) => setName(e.target.value)} />
-                </Field>
-              </div>
-              <Button onClick={onSaveName} loading={busy} className="self-end">Save</Button>
-            </div>
+          <div className="mt-6">
+            {tab === "general" && (
+              <Section title="Branding">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded border border-line bg-canvas text-ink-mute hover:border-ink-mute"
+                    title="Upload organization logo"
+                  >
+                    {org?.logoUrl ? <img src={org.logoUrl} alt="" className="h-full w-full object-contain p-2" /> : <ImagePlus size={20} />}
+                  </button>
+                  <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void onLogo(f); }} />
+                  <div className="flex-1">
+                    <Field label="Organization name" htmlFor="on">
+                      <Input id="on" value={name} onChange={(e) => setName(e.target.value)} />
+                    </Field>
+                  </div>
+                  <Button onClick={onSaveName} loading={busy} className="self-end">Save</Button>
+                </div>
+              </Section>
+            )}
 
-            <h2 className="mt-10 font-mono text-2xs uppercase tracking-widest text-ink-mute">
-              Usage · {planFor(org?.subscriptionTier).name} plan
-            </h2>
-            <div className="mt-3 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2">
-              <Meter label="Projects" used={usage?.projects ?? 0} cap={planFor(org?.subscriptionTier).limits.projects} />
-              <Meter label="Member seats" used={usage?.members ?? 0} cap={planFor(org?.subscriptionTier).limits.members} />
-              <Meter label="Snapshots" used={usage?.snapshots ?? 0} cap={planFor(org?.subscriptionTier).limits.snapshots} />
-              <Meter
-                label="Attachment storage"
-                used={Math.round((usage?.storageBytes ?? 0) / 1024 / 1024)}
-                cap={planFor(org?.subscriptionTier).limits.storageMb}
-                unit="MB"
-              />
-            </div>
-            <p className="mt-3 text-2xs text-ink-mute">
-              {usage?.nodes ?? 0} nodes across all projects (cap is per project:{" "}
-              {planFor(org?.subscriptionTier).limits.nodesPerProject ?? "unlimited"}). Need more room?{" "}
-              <Link to="/pricing" className="text-brand-blue hover:underline">See plans</Link>.
-            </p>
+            {tab === "members" && <OrgMembers orgId={adminOrg.orgId} />}
 
-            <h2 className="mt-10 font-mono text-2xs uppercase tracking-widest text-ink-mute">Billing</h2>
-            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface p-4">
-              <p className="text-sm text-ink-dim">
-                Current plan: <span className="font-mono text-ink">{planFor(org?.subscriptionTier).name}</span>
-              </p>
-              <div className="ml-auto flex flex-wrap gap-2">
-                {org?.subscriptionTier === "free" ? (
-                  <>
-                    <Button variant="outline" size="sm" loading={billing} onClick={() => onCheckout("pro")}>
-                      Upgrade to Pro
-                    </Button>
-                    <Button size="sm" loading={billing} onClick={() => onCheckout("pro_max")}>
-                      Upgrade to Pro Max
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="outline" size="sm" loading={billing} onClick={onManageBilling}>
-                    <CreditCard size={13} /> Manage billing
-                  </Button>
-                )}
+            {tab === "billing" && (
+              <div className="space-y-6">
+                <Section title={`Usage · ${planFor(org?.subscriptionTier).name} plan`} bodyClassName="p-0">
+                  <div className="grid grid-cols-1 gap-px bg-line sm:grid-cols-2">
+                    <Meter label="Projects" used={usage?.projects ?? 0} cap={planFor(org?.subscriptionTier).limits.projects} />
+                    <Meter label="Member seats" used={usage?.members ?? 0} cap={planFor(org?.subscriptionTier).limits.members} />
+                    <Meter label="Snapshots" used={usage?.snapshots ?? 0} cap={planFor(org?.subscriptionTier).limits.snapshots} />
+                    <Meter
+                      label="Attachment storage"
+                      used={Math.round((usage?.storageBytes ?? 0) / 1024 / 1024)}
+                      cap={planFor(org?.subscriptionTier).limits.storageMb}
+                      unit="MB"
+                    />
+                  </div>
+                  <p className="px-4 py-3 text-2xs text-ink-mute">
+                    {usage?.nodes ?? 0} nodes across all projects (cap is per project:{" "}
+                    {planFor(org?.subscriptionTier).limits.nodesPerProject ?? "unlimited"}).{" "}
+                    <Link to="/pricing" className="text-brand-blue hover:underline">See plans</Link>.
+                  </p>
+                </Section>
+
+                <Section title="Plan">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm text-ink-dim">
+                      You're on the <span className="font-mono text-ink">{planFor(org?.subscriptionTier).name}</span> plan.
+                    </p>
+                    <div className="ml-auto flex flex-wrap gap-2">
+                      {org?.subscriptionTier === "free" ? (
+                        <>
+                          <Button variant="outline" size="sm" loading={billing} onClick={() => onCheckout("pro")}>
+                            Upgrade to Pro
+                          </Button>
+                          <Button size="sm" loading={billing} onClick={() => onCheckout("pro_max")}>
+                            Upgrade to Pro Max
+                          </Button>
+                        </>
+                      ) : (
+                        <Button variant="outline" size="sm" loading={billing} onClick={onManageBilling}>
+                          <CreditCard size={13} /> Manage billing
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Section>
               </div>
-            </div>
-          </>
+            )}
+          </div>
         )}
       </div>
     </AppLayout>

@@ -73,7 +73,7 @@ export function Join() {
     return (
       <AuthCard title="Check your email" subtitle="We sent you a secure sign-in link.">
         <p className="py-4 text-center text-sm text-ink-dim">
-          Open the link on this device to join the project. No password needed.
+          Open the link on this device to join your team. No password needed.
         </p>
       </AuthCard>
     );
@@ -82,13 +82,14 @@ export function Join() {
   const authed = status === "authed";
   return (
     <AuthCard
-      title="Join a project"
-      subtitle={authed ? "Enter your invitation code to join." : "Invited as a Viewer? Enter your code and email."}
+      title="Join your team"
+      subtitle={authed ? "Enter the invitation code you were given." : "Enter your invitation code and email to join."}
     >
       <div className="mb-5 flex items-start gap-2 rounded border border-line bg-canvas px-3 py-2">
         <Ticket size={16} className="mt-0.5 shrink-0 text-brand-orange" />
         <p className="text-2xs text-ink-dim">
-          Viewer access is read-only (plus comments if your inviter allowed it).
+          Your access level is set by whoever invited you — an organization admin, project manager,
+          or team lead.
         </p>
       </div>
       <form onSubmit={authed ? onAuthedSubmit : onAnonSubmit} className="space-y-4">

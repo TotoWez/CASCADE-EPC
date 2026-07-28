@@ -32,8 +32,8 @@ export function Onboarding() {
 
   return (
     <AuthCard
-      title="Create your organization"
-      subtitle="You'll be the Admin: manage projects, branding, and team."
+      title="Create your company workspace"
+      subtitle="You'll be the Admin — manage projects, branding, and your team."
     >
       <div className="mb-5 flex items-start gap-2 rounded border border-line bg-canvas px-3 py-2">
         <ShieldCheck size={16} className="mt-0.5 shrink-0 text-brand-blue" />

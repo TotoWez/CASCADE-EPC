@@ -38,10 +38,10 @@ export function Pricing() {
         </Link>
 
         <div className="text-center">
-          <h1 className="rise-in font-brand text-3xl tracking-wide sm:text-4xl">Plans &amp; pricing</h1>
+          <h1 className="rise-in font-brand text-3xl tracking-wide sm:text-4xl">Simple, honest pricing</h1>
           <p className="rise-in rise-in-1 mx-auto mt-3 max-w-2xl text-ink-dim">
-            Simple tiers that scale with the size of your work breakdown, your team, and your project
-            portfolio. Start free and grow into it.
+            Start free and upgrade when your team and portfolio grow. Priced flatly per workspace —
+            no per-seat surprises — and you can change or cancel anytime.
           </p>
           <p className="rise-in rise-in-2 mt-4 inline-flex items-center gap-2 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-4 py-1.5 font-mono text-2xs uppercase tracking-widest text-brand-blue-light">
             <Sparkles size={13} /> Flat monthly pricing in AED · cancel anytime
@@ -106,7 +106,8 @@ export function Pricing() {
         </div>
 
         <p className="text-center text-2xs text-ink-mute">
-          Need something specific? <a href="mailto:hello@cascade-epc.com" className="text-brand-blue hover:underline">hello@cascade-epc.com</a>
+          Prices in AED, billed monthly, cancel anytime. Need something bigger or a custom setup?{" "}
+          <a href="mailto:hello@cascade-epc.com" className="text-brand-blue hover:underline">hello@cascade-epc.com</a>
         </p>
       </main>
 

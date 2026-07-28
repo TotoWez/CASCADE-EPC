@@ -35,10 +35,9 @@ export function AboutModal({ open, onClose }: { open: boolean; onClose: () => vo
       <div className="space-y-4">
         <Brand size={34} showSlogan />
         <p className="text-sm text-ink-dim">
-          CASCADE-EPC is a hierarchical EPC execution tracker for substation, transmission, and
-          industrial projects — plan the WBS, track real progress with volume-weighted rollup,
-          manage dependencies and blockers, mirror linked work, enforce QAQC/HSE gates, and export
-          client-ready reports.
+          The execution tracker for substation, transmission, and industrial projects. Plan the work
+          breakdown, track real progress as it rolls up from the field, keep blockers visible, mirror
+          linked work, hold QAQC and HSE sign-off in place, and export client-ready reports.
         </p>
         <div>
           <p className="mb-2 font-mono text-2xs uppercase tracking-widest text-ink-mute">Status model</p>
