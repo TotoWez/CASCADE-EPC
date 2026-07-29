@@ -3,8 +3,8 @@
  * org usage meters, and (mirrored in SQL) the database limit triggers.
  *
  * Three tiers, priced flat per workspace in AED (seats are a limit, not a
- * per-seat multiplier). Keep `limits` in sync with `plan_limits()` in
- * supabase/migrations/0012_platform_and_billing.sql.
+ * per-seat multiplier). Keep `limits` in sync with `plan_limits()` — currently
+ * (re)defined in supabase/migrations/0014_refresh_plan_limits.sql.
  */
 
 export type PlanId = "free" | "pro" | "pro_max";
@@ -14,7 +14,7 @@ export interface PlanLimits {
   projects: number | null;
   nodesPerProject: number | null;
   members: number | null;
-  /** Attachment storage cap in MB (Free = 300 MB, so MB not GB). */
+  /** Attachment storage cap in MB. */
   storageMb: number | null;
   snapshots: number | null;
 }
@@ -45,7 +45,7 @@ export const PLANS: Plan[] = [
     priceSub: "forever",
     cta: "Start free",
     ctaTo: "/signup",
-    limits: { projects: 1, nodesPerProject: 300, members: 3, storageMb: 300, snapshots: 5 },
+    limits: { projects: 1, nodesPerProject: 300, members: 3, storageMb: 30, snapshots: 10 },
     features: [
       "Volume-weighted WBS rollup",
       "Dependencies, blockers & linked nodes",
@@ -63,12 +63,12 @@ export const PLANS: Plan[] = [
     cta: "Upgrade to Pro",
     ctaTo: "/signup",
     highlighted: true,
-    limits: { projects: 5, nodesPerProject: 5_000, members: 50, storageMb: 2_048, snapshots: 50 },
+    limits: { projects: 5, nodesPerProject: 5_000, members: 50, storageMb: 200, snapshots: 100 },
     features: [
       "Everything in Free, plus:",
       "5 projects · 50 member seats",
       "5,000 nodes per project",
-      "2 GB attachments · 50 snapshots",
+      "200 MB attachments · 100 snapshots",
       "WBS import / export + Flowchart report",
       "Email support",
     ],
@@ -81,12 +81,12 @@ export const PLANS: Plan[] = [
     priceSub: "/ month",
     cta: "Upgrade to Pro Max",
     ctaTo: "/signup",
-    limits: { projects: 12, nodesPerProject: 12_000, members: 120, storageMb: 5_120, snapshots: 120 },
+    limits: { projects: 12, nodesPerProject: 12_000, members: 120, storageMb: 500, snapshots: 250 },
     features: [
       "Everything in Pro, plus:",
       "12 projects · 120 member seats",
       "12,000 nodes per project",
-      "5 GB attachments · 120 snapshots",
+      "500 MB attachments · 250 snapshots",
       "Priority support",
     ],
   },
@@ -107,6 +107,34 @@ export function fmtStorage(mb: number | null): string {
 /** Look up a plan by its tier id, falling back to Free for unknown tiers. */
 export function planById(id: string | null | undefined): Plan {
   return PLANS.find((p) => p.id === (id ?? "free")) ?? PLANS[0]!;
+}
+
+/**
+ * Consumption thresholds for usage warnings:
+ *   ok < 50% ≤ notice < 80% ≤ warning < 100% ≤ full.
+ * A null cap means unlimited → always "ok". Enforcement is in the DB triggers;
+ * these levels drive the proactive UI warnings only.
+ */
+export type UsageLevel = "ok" | "notice" | "warning" | "full";
+
+export function usageLevel(used: number, cap: number | null): UsageLevel {
+  if (cap === null || cap <= 0) return "ok";
+  const ratio = used / cap;
+  if (ratio >= 1) return "full";
+  if (ratio >= 0.8) return "warning";
+  if (ratio >= 0.5) return "notice";
+  return "ok";
+}
+
+/** Warning copy for a metric at 50% / 80% / 100%, or null below 50% / unlimited. */
+export function usageMessage(label: string, used: number, cap: number | null, unit?: string): string | null {
+  const level = usageLevel(used, cap);
+  if (level === "ok" || cap === null) return null;
+  const u = unit ? ` ${unit}` : "";
+  const usage = `${used.toLocaleString()}/${cap.toLocaleString()}${u}`;
+  if (level === "full") return `${label} limit reached (${usage}) — upgrade to add more.`;
+  if (level === "warning") return `${label} almost full (${usage}) — consider upgrading.`;
+  return `${label} over half used (${usage}).`;
 }
 
 /** Rows for the side-by-side comparison matrix. */

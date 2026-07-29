@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { AppLayout } from "@/components/AppLayout";
 import { useProject } from "@/store/project";
 import { useTree } from "@/store/tree";
+import { getOrg } from "@/lib/api/org";
+import { planById, usageLevel, usageMessage } from "@/lib/plans";
 import { ROLE_LABEL } from "@/lib/types";
 import { ProjectControl } from "@/features/projects/ProjectControl";
 import { TeamPanel } from "@/features/projects/TeamPanel";
@@ -24,7 +26,9 @@ export function ProjectWorkspace() {
   const { id } = useParams<{ id: string }>();
   const { load, clear, loading, project, role, error } = useProject();
   const loadTree = useTree((s) => s.load);
+  const nodeCount = useTree((s) => s.nodes.length);
   const [tab, setTab] = useState<Tab>("wbs");
+  const [nodeCap, setNodeCap] = useState<number | null>(null);
 
   useRealtime(id ?? null);
 
@@ -35,6 +39,14 @@ export function ProjectWorkspace() {
     }
     return () => clear();
   }, [id, load, clear, loadTree]);
+
+  // The per-project node cap depends on the owning org's plan.
+  useEffect(() => {
+    if (!project?.orgId) return;
+    getOrg(project.orgId)
+      .then((o) => setNodeCap(planById(o?.subscriptionTier).limits.nodesPerProject))
+      .catch(() => {});
+  }, [project?.orgId]);
 
   if (loading) {
     return (
@@ -87,9 +99,28 @@ export function ProjectWorkspace() {
         </nav>
       </div>
 
-      {tab === "wbs" && <WbsView />}
+      {tab === "wbs" && (
+        <>
+          <NodeLimitBanner used={nodeCount} cap={nodeCap} />
+          <WbsView />
+        </>
+      )}
       {tab === "control" && <ProjectControl />}
       {tab === "team" && <TeamPanel />}
     </AppLayout>
   );
+}
+
+/** 50% / 80% / 100% warning for the per-project node cap; hidden below 50%. */
+function NodeLimitBanner({ used, cap }: { used: number; cap: number | null }) {
+  const level = usageLevel(used, cap);
+  const msg = usageMessage("Nodes", used, cap);
+  if (level === "ok" || !msg) return null;
+  const cls =
+    level === "full"
+      ? "border-status-blocked/50 bg-status-blocked/10 text-status-blocked"
+      : level === "warning"
+        ? "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
+        : "border-line bg-surface-2 text-ink-dim";
+  return <div className={`border-b px-4 py-2 font-mono text-2xs ${cls}`}>{msg}</div>;
 }

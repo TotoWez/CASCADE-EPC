@@ -18,6 +18,8 @@ Multi-tenant Postgres schema with Row-Level Security and SECURITY DEFINER RPCs.
 | `0010_lock_platform_role.sql` | **Security:** trigger blocking users from self-setting `platform_role` (privilege escalation) |
 | `0011_plan_limits_and_hardening.sql` | Plan-limit triggers (projects/nodes/seats/snapshots/attachments), attachment MIME+size validation, `accept_invitation` race fix |
 | `0012_platform_and_billing.sql` | Owner-console + Stripe billing: retier `plan_limits()` to free/pro/pro_max (AED, storage in MB), billing-column lock trigger, org `suspended` + suspend guard in `auth_project_role`, `platform_overview`/`platform_set_tier`/`platform_set_suspended` RPCs |
+| `0013_org_membership.sql` | Org-level invites + admin management: `create_org_invitation`, `set_org_member_role`, `remove_org_member` (last-admin protected) |
+| `0014_refresh_plan_limits.sql` | Update per-tier caps (attachments + snapshots) — re-defines `plan_limits()`; mirrors `src/lib/plans.ts` |
 | `seed.sql` | Optional demo org/project/WBS (attaches to first profile) |
 
 ## Apply to a hosted project (free tier)

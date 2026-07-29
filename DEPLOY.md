@@ -5,7 +5,7 @@ Static front-end on **Cloudflare Pages** + **Supabase** backend.
 ## 1. Supabase (backend)
 
 1. Create a project at [supabase.com](https://supabase.com) — region **`ap-south-1` (Mumbai)**.
-2. Apply the migrations in `supabase/migrations/0001…0012` (SQL editor in order, or
+2. Apply the migrations in `supabase/migrations/0001…0014` (SQL editor in order, or
    `supabase db push`). See [`supabase/README.md`](supabase/README.md).
 3. **Database → Extensions:** enable `pg_cron` to activate the daily auto-snapshot
    and the inactivity keep-alive jobs.

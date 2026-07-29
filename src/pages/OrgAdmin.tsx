@@ -11,7 +11,7 @@ import { useAuth } from "@/store/auth";
 import { getOrg, updateOrg, uploadBranding, usageStats, type Org, type UsageStats } from "@/lib/api/org";
 import { startCheckout, openPortal } from "@/lib/api/billing";
 import { OrgMembers } from "@/features/org/OrgMembers";
-import { PLANS, type Plan } from "@/lib/plans";
+import { PLANS, usageLevel, usageMessage, type Plan } from "@/lib/plans";
 import { toast } from "@/store/toast";
 
 type OrgTab = "general" | "members" | "billing";
@@ -116,6 +116,18 @@ export function OrgAdmin() {
     }
   }
 
+  const plan = planFor(org?.subscriptionTier);
+  const storageUsedMb = Math.round((usage?.storageBytes ?? 0) / 1024 / 1024);
+  const meters: { label: string; used: number; cap: number | null; unit?: string }[] = [
+    { label: "Projects", used: usage?.projects ?? 0, cap: plan.limits.projects },
+    { label: "Member seats", used: usage?.members ?? 0, cap: plan.limits.members },
+    { label: "Snapshots", used: usage?.snapshots ?? 0, cap: plan.limits.snapshots },
+    { label: "Attachment storage", used: storageUsedMb, cap: plan.limits.storageMb, unit: "MB" },
+  ];
+  const usageAlerts = meters
+    .filter((m) => ["warning", "full"].includes(usageLevel(m.used, m.cap)))
+    .map((m) => usageMessage(m.label, m.used, m.cap, m.unit)!);
+
   return (
     <AppLayout>
       <div className="mx-auto max-w-3xl px-4 py-8">
@@ -174,21 +186,36 @@ export function OrgAdmin() {
 
             {tab === "billing" && (
               <div className="space-y-6">
-                <Section title={`Usage · ${planFor(org?.subscriptionTier).name} plan`} bodyClassName="p-0">
+                {usageAlerts.length > 0 && (
+                  <div className="rounded-card border border-brand-orange/50 bg-brand-orange/10 p-4">
+                    <p className="font-mono text-2xs uppercase tracking-widest text-brand-orange">Approaching your plan limits</p>
+                    <ul className="mt-2 space-y-1 text-sm text-ink-dim">
+                      {usageAlerts.map((a) => (
+                        <li key={a}>· {a}</li>
+                      ))}
+                    </ul>
+                    {org?.subscriptionTier !== "pro_max" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        loading={billing}
+                        onClick={() => onCheckout(org?.subscriptionTier === "pro" ? "pro_max" : "pro")}
+                      >
+                        Upgrade plan
+                      </Button>
+                    )}
+                  </div>
+                )}
+                <Section title={`Usage · ${plan.name} plan`} bodyClassName="p-0">
                   <div className="grid grid-cols-1 gap-px bg-line sm:grid-cols-2">
-                    <Meter label="Projects" used={usage?.projects ?? 0} cap={planFor(org?.subscriptionTier).limits.projects} />
-                    <Meter label="Member seats" used={usage?.members ?? 0} cap={planFor(org?.subscriptionTier).limits.members} />
-                    <Meter label="Snapshots" used={usage?.snapshots ?? 0} cap={planFor(org?.subscriptionTier).limits.snapshots} />
-                    <Meter
-                      label="Attachment storage"
-                      used={Math.round((usage?.storageBytes ?? 0) / 1024 / 1024)}
-                      cap={planFor(org?.subscriptionTier).limits.storageMb}
-                      unit="MB"
-                    />
+                    {meters.map((m) => (
+                      <Meter key={m.label} label={m.label} used={m.used} cap={m.cap} unit={m.unit} />
+                    ))}
                   </div>
                   <p className="px-4 py-3 text-2xs text-ink-mute">
                     {usage?.nodes ?? 0} nodes across all projects (cap is per project:{" "}
-                    {planFor(org?.subscriptionTier).limits.nodesPerProject ?? "unlimited"}).{" "}
+                    {plan.limits.nodesPerProject ?? "unlimited"}).{" "}
                     <Link to="/pricing" className="text-brand-blue hover:underline">See plans</Link>.
                   </p>
                 </Section>
@@ -225,10 +252,22 @@ export function OrgAdmin() {
   );
 }
 
-/** Usage vs plan-cap meter. `cap` null = unlimited (no bar). */
+/** Usage vs plan-cap meter with 50% / 80% / 100% warnings. `cap` null = unlimited. */
 function Meter({ label, used, cap, unit }: { label: string; used: number; cap: number | null; unit?: string }) {
   const pct = cap ? Math.min(100, Math.round((used / cap) * 100)) : 0;
-  const barColor = pct >= 90 ? "bg-status-blocked" : pct >= 70 ? "bg-brand-orange" : "bg-brand-blue";
+  const level = usageLevel(used, cap);
+  const barColor =
+    level === "full" ? "bg-status-blocked" : level === "warning" ? "bg-brand-orange" : "bg-brand-blue";
+  const caption =
+    level === "full"
+      ? "Limit reached — upgrade to add more"
+      : level === "warning"
+        ? "Almost full — consider upgrading"
+        : level === "notice"
+          ? "Over half used"
+          : null;
+  const captionColor =
+    level === "full" ? "text-status-blocked" : level === "warning" ? "text-brand-orange" : "text-ink-mute";
   return (
     <div className="bg-surface px-4 py-3">
       <div className="flex items-baseline justify-between">
@@ -243,6 +282,7 @@ function Meter({ label, used, cap, unit }: { label: string; used: number; cap: n
           <div className={`h-full ${barColor}`} style={{ width: `${pct}%` }} />
         </div>
       )}
+      {caption && <p className={`mt-1 text-2xs ${captionColor}`}>{caption}</p>}
     </div>
   );
 }
